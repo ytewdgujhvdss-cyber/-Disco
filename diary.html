@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鎴戠殑鏃ヨ</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    body {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f7f7f7;
+    }
+    h1 { font-size: 22px; margin-bottom: 12px; color: #333; }
+    textarea {
+      width: 100%; height: 160px; padding: 14px; font-size: 16px;
+      border-radius: 10px; border: 1px solid #ddd; resize: none; outline: none;
+    }
+
+    /* 鎼滅储妗?+ 鎸夐挳 */
+    .search-row {
+      display: flex;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    input.search {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 15px;
+    }
+    button.search-btn {
+      padding: 10px 16px;
+      background: #FF9500;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    button {
+      margin-top: 10px; padding: 10px 16px; border: none; border-radius: 8px;
+      background: #4c84ff; color: white; font-size: 15px; cursor: pointer;
+    }
+    .show-md { background: #7B68EE; margin-left: 10px; }
+    .summary-btn { background: #20C997; margin-left: 10px; }
+    .clear-btn { background: #ff3b30; margin-left: 10px; }
+    .sync-btn { background: #ff9500; margin-left: 10px; }
+
+    .diary-list { margin-top: 30px; }
+    .date-group { margin: 20px 0 10px; font-size: 14px; color: #666; font-weight: bold; }
+    .diary-item {
+      background: white; padding: 14px; border-radius: 10px;
+      margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      scroll-margin-top: 20px;
+      position: relative;
+    }
+    .time { font-size: 12px; color: #999; margin-bottom: 6px; }
+    .content { font-size: 15px; line-height: 1.5; color: #333; }
+
+    /* 鍗曟潯鍒犻櫎鎸夐挳 */
+    .del-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      background: #ff3b30;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    /* 鎼滅储楂樹寒 */
+    .highlight {
+      background: #fff159;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+
+    /* 鍙鍒跺唴瀹规 */
+    .copy-box {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      white-space: pre-wrap;
+      font-size: 14px;
+      line-height: 1.6;
+      font-family: monospace;
+    }
+    .title {
+      margin-top: 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+    .summary-box {
+      margin-top: 15px;
+      padding: 15px;
+      background: #efffef;
+      border-radius: 10px;
+      border: 1px solid #d4ffd4;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+    .date-pick-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .date-pick-btn {
+      padding: 8px 14px;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .date-pick-btn:hover {
+      background: #e0e0e0;
+    }
+
+    /* 鍚屾鐘舵€?*/
+    .sync-status {
+      font-size: 12px;
+      color: #999;
+      margin-top: 5px;
+    }
+    .sync-status.synced { color: #20c997; }
+    .sync-status.syncing { color: #ff9500; }
+    .sync-status.error { color: #ff3b30; }
+
+    /* 鍚屾璁剧疆寮圭獥 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal.show { display: flex; }
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 90%;
+    }
+    .modal-content h3 { margin-bottom: 15px; }
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .modal-content .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .modal-content .btn-row button {
+      flex: 1;
+      margin: 0;
+    }
+    .modal-content .btn-cancel {
+      background: #ccc !important;
+    }
+    .modal-tip {
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>鎴戠殑鏃ヨ</h1>
+  <textarea id="input" placeholder="浠婂ぉ鍙戠敓浜嗕粈涔堬紵"></textarea>
+
+  <div class="search-row">
+    <input class="search" id="search" placeholder="馃攳 杈撳叆鍏抽敭璇嶆悳绱㈡棩璁?..">
+    <button class="search-btn" onclick="goToSearch()">馃攷 鎼滅储瀹氫綅</button>
+  </div>
+
+  <button class="summary-btn" onclick="showTodaySummary()">馃搳 鐢熸垚浠婃棩鏃ヨ鎬荤粨</button>
+  <button class="show-md" onclick="showMarkdownText()">馃搵 鏄剧ず鍙鍒?MD 鏂囨湰</button>
+  <button class="clear-btn" onclick="clearAllDiaries()">馃棏锔?娓呯┖</button>
+  <button class="sync-btn" onclick="showSyncModal()">鈽侊笍 鍚屾</button>
+
+  <div id="syncStatus" class="sync-status"></div>
+
+  <div id="summaryArea"></div>
+  <div id="copyArea"></div>
+
+  <div class="diary-list" id="list"></div>
+
+  <!-- 鍚屾璁剧疆寮圭獥 -->
+  <div class="modal" id="syncModal">
+    <div class="modal-content">
+      <h3>鈽侊笍 GitHub Gist 鍚屾璁剧疆</h3>
+      <input type="text" id="gistToken" placeholder="GitHub Token (ghp_xxx)">
+      <div class="modal-tip">闇€瑕?Gist 鏉冮檺鐨?Token</div>
+      <div class="btn-row">
+        <button class="btn-cancel" onclick="closeSyncModal()">鍙栨秷</button>
+        <button onclick="saveGistToken()">淇濆瓨</button>
+      </div>
+      <div id="gistInfo" style="margin-top:15px; font-size:13px; color:#666;"></div>
+    </div>
+  </div>
+
+  <script>
+    const GIST_TOKEN_KEY = 'diary_gist_token';
+    const GIST_ID_KEY = 'diary_gist_id';
+    const GIST_FILENAME = 'my-diary.json';
+
+    // ============ Gist 鍚屾鏍稿績 ============
+
+    // 鑾峰彇 token 鍜?gistId
+    function getGistConfig() {
+      return {
+        token: localStorage.getItem(GIST_TOKEN_KEY),
+        gistId: localStorage.getItem(GIST_ID_KEY)
+      };
+    }
+
+    // 鏄剧ず鍚屾寮圭獥
+    function showSyncModal() {
+      const { token, gistId } = getGistConfig();
+      document.getElementById('gistToken').value = token || '';
+      const info = document.getElementById('gistInfo');
+      if (gistId) {
+        info.innerHTML = `宸茬粦瀹?Gist: <a href="https://gist.github.com/${gistId}" target="_blank">${gistId}</a><br><button onclick="unlinkGist()" style="margin-top:8px;padding:5px 10px;background:#ff3b30;font-size:12px;">瑙ｉ櫎缁戝畾</button>`;
+      } else {
+        info.innerHTML = '灏氭湭缁戝畾 Gist锛屼繚瀛?Token 鍚庝細鑷姩鍒涘缓';
+      }
+      document.getElementById('syncModal').classList.add('show');
+    }
+
+    function closeSyncModal() {
+      document.getElementById('syncModal').classList.remove('show');
+    }
+
+    // 瑙ｉ櫎 Gist 缁戝畾
+    function unlinkGist() {
+      if (!confirm('纭畾瑙ｉ櫎缁戝畾锛熸湰鍦版棩璁颁笉浼氬垹闄ゃ€?)) return;
+      localStorage.removeItem(GIST_ID_KEY);
+      showSyncModal();
+      updateSyncStatus('宸茶В闄ょ粦瀹?, '');
+    }
+
+    // 淇濆瓨 token 骞跺悓姝?    async function saveGistToken() {
+      const token = document.getElementById('gistToken').value.trim();
+      if (!token) {
+        alert('璇疯緭鍏?Token');
+        return;
+      }
+      localStorage.setItem(GIST_TOKEN_KEY, token);
+      closeSyncModal();
+      updateSyncStatus('姝ｅ湪鍚屾...', 'syncing');
+      await syncToGist();
+    }
+
+    // 鏇存柊鍚屾鐘舵€佹樉绀?    function updateSyncStatus(msg, type) {
+      const el = document.getElementById('syncStatus');
+      el.textContent = msg;
+      el.className = 'sync-status ' + type;
+    }
+
+    // 鍚屾鍒?Gist
+    async function syncToGist() {
+      const { token, gistId } = getGistConfig();
+      if (!token) {
+        updateSyncStatus('鏈缃?Token', 'error');
+        return false;
+      }
+
+      const diaries = getDiaries();
+      const content = JSON.stringify(diaries, null, 2);
+
+      try {
+        if (gistId) {
+          // 鏇存柊鐜版湁 Gist
+          const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              files: {
+                [GIST_FILENAME]: { content }
+              }
+            })
+          });
+          if (!res.ok) throw new Error('鏇存柊澶辫触');
+        } else {
+          // 鍒涘缓鏂?Gist
+          const res = await fetch('https://api.github.com/gists', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              description: '鎴戠殑鏃ヨ澶囦唤',
+              public: false,
+              files: {
+                [GIST_FILENAME]: { content }
+              }
+            })
+          });
+          if (!res.ok) throw new Error('鍒涘缓澶辫触');
+          const data = await res.json();
+          localStorage.setItem(GIST_ID_KEY, data.id);
+        }
+        updateSyncStatus('鈽侊笍 宸插悓姝?' + new Date().toLocaleTimeString(), 'synced');
+        return true;
+      } catch (e) {
+        console.error(e);
+        updateSyncStatus('鍚屾澶辫触', 'error');
+        return false;
+      }
+    }
+
+    // 浠?Gist 鍔犺浇
+    async function loadFromGist() {
+      const { token, gistId } = getGistConfig();
+      if (!token || !gistId) return null;
+
+      try {
+        const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        const file = data.files[GIST_FILENAME];
+        if (file) {
+          return JSON.parse(file.content);
+        }
+      } catch (e) {
+        console.error('鍔犺浇澶辫触', e);
+      }
+      return null;
+    }
+
+    // 鍚姩鏃跺姞杞斤紙浼樺厛鏈湴锛屽悎骞朵簯绔級
+    async function initSync() {
+      const { token } = getGistConfig();
+      if (!token) return;
+
+      updateSyncStatus('姝ｅ湪鍔犺浇...', 'syncing');
+      const cloudDiaries = await loadFromGist();
+      const localDiaries = getDiaries();
+
+      if (cloudDiaries && cloudDiaries.length > 0) {
+        // 鍚堝苟锛氫互鏃堕棿鏈€鏂颁负鍑?        const merged = [...cloudDiaries];
+        localDiaries.forEach(ld => {
+          const exists = merged.find(gd => gd.time === ld.time && gd.content === ld.content);
+          if (!exists) merged.push(ld);
+        });
+        // 鎸夋椂闂存帓搴忥紙鏂扮殑鍦ㄥ墠锛?        merged.sort((a, b) => new Date(b.time) - new Date(a.time));
+        localStorage.setItem('diaries', JSON.stringify(merged));
+        updateSyncStatus('鈽侊笍 宸蹭粠浜戠鍔犺浇', 'synced');
+      } else {
+        // 棣栨锛氫笂浼犳湰鍦版暟鎹?        await syncToGist();
+      }
+    }
+
+    // ============ 鏃ヨ鏍稿績鍔熻兘 ============
+
+    // 鑾峰彇鏃ヨ
+    function getDiaries() {
+      return JSON.parse(localStorage.getItem('diaries') || '[]');
+    }
+
+    // 淇濆瓨鏃ヨ锛堣嚜鍔ㄥ悓姝ワ級
+    function saveDiaries(diaries) {
+      localStorage.setItem('diaries', JSON.stringify(diaries));
+      syncToGist(); // 寮傛鍚屾锛屼笉闃诲
+    }
+
+    // 鑷姩淇濆瓨
+    const input = document.getElementById('input');
+    input.addEventListener('blur', function() {
+      const content = this.value.trim();
+      if (!content) return;
+      const diaries = getDiaries();
+      diaries.unshift({
+        time: new Date().toLocaleString(),
+        date: new Date().toLocaleDateString(),
+        content: content
+      });
+      saveDiaries(diaries);
+      this.value = '';
+      renderList();
+    });
+
+    // 娓叉煋鍒楄〃
+    function renderList() {
+      const list = document.getElementById('list');
+      const search = document.getElementById('search').value.toLowerCase();
+      const diaries = getDiaries();
+
+      let html = '';
+      let lastDate = '';
+
+      diaries.forEach((d, index) => {
+        if (d.date !== lastDate) {
+          lastDate = d.date;
+          html += `<div class="date-group">馃搮 ${d.date}</div>`;
+        }
+
+        let content = d.content;
+        if (search && search.trim() !== '') {
+          const reg = new RegExp(`(${search})`, 'gi');
+          content = content.replace(reg, '<span class="highlight">$1</span>');
+        }
+
+        html += `
+          <div class="diary-item">
+            <button class="del-btn" onclick="deleteSingle(${index})">脳</button>
+            <div class="time">${d.time}</div>
+            <div class="content">${content}</div>
+          </div>
+        `;
+      });
+
+      list.innerHTML = html || '<div style="text-align:center; margin-top:30px; color:#999;">鏆傛棤鏃ヨ</div>';
+    }
+
+    // 鍒犻櫎鍗曟潯
+    function deleteSingle(index) {
+      if (!confirm('鈿狅笍 纭畾鍒犻櫎杩欐潯鏃ヨ鍚楋紵')) return;
+      const diaries = getDiaries();
+      diaries.splice(index, 1);
+      saveDiaries(diaries);
+      renderList();
+    }
+
+    // 鎼滅储瀹氫綅
+    function goToSearch() {
+      const search = document.getElementById('search').value.trim().toLowerCase();
+      if (!search) {
+        alert('璇疯緭鍏ユ悳绱㈠叧閿瘝');
+        return;
+      }
+      renderList();
+      const first = document.querySelector('.highlight');
+      if (first) {
+        first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        alert('鏈壘鍒板尮閰嶅唴瀹?);
+      }
+    }
+
+    // 浠婃棩鎬荤粨
+    function showTodaySummary() {
+      const today = new Date().toLocaleDateString();
+      const list = getDiaries().filter(i => i.date === today);
+      if (list.length === 0) {
+        alert('浠婂ぉ鏆傛棤鏃ヨ');
+        return;
+      }
+
+      let allContent = list.map(i => i.content).join(' ');
+      let summary = `浠婃棩鍏?${list.length} 鏉¤褰昞n`;
+
+      if (/寮€蹇億蹇箰|椤哄埄|濂絴妫抾鎴愬姛|鍠滄|鑸掓湇/.test(allContent)) summary += '馃槉 蹇冩儏涓嶉敊';
+      else if (/绱瘄鐤叉儷|杈涜嫤|鍥?.test(allContent)) summary += '馃槷鈥嶐煉?鏈夌偣鐤叉儷';
+      else if (/蹇檤宸ヤ綔|瀛︿範|浠诲姟/.test(allContent)) summary += '馃捈 蹇欑鍏呭疄';
+      else if (/鍚冮キ|缇庨|鐏攨|铔嬬硶|濂惰尪/.test(allContent)) summary += '馃崝 缇庨鏃跺厜';
+      else if (/杩愬姩|璺戞|鍋ヨ韩|璧拌矾/.test(allContent)) summary += '馃弮 杩愬姩娲诲姏';
+      else if (/鐫¤|浼戞伅|韬哄钩/.test(allContent)) summary += '馃泴 濂藉ソ浼戞伅';
+      else if (/闅捐繃|鐢熸皵|鐑绯熺硶/.test(allContent)) summary += '馃様 鎯呯华涓€鑸?;
+      else summary += '馃摑 骞抽潤鏃ュ父';
+
+      const formatTime = (t) => {
+        const m = t.match(/(\d{1,2}:\d{2}):\d{2}/);
+        return m ? m[1] : t;
+      };
+      summary += `\n\n浠婃棩鍐呭锛歕n${list.map((i, idx) => `${idx+1}. [${formatTime(i.time)}] ${i.content}`).join('\n')}`;
+
+      document.getElementById('summaryArea').innerHTML = `
+        <div class="title">鉁?浠婃棩鏃ヨ鎬荤粨</div>
+        <div class="summary-box">${summary.replace(/\n/g, '<br>')}</div>
+      `;
+    }
+
+    // MD 瀵煎嚭
+    function showMarkdownText() {
+      const diaries = getDiaries();
+      if (diaries.length === 0) {
+        alert('鏆傛棤鏃ヨ');
+        return;
+      }
+      const dates = diaries.map(d => d.date);
+      const minDate = dates.reduce((a, b) => a < b ? a : b);
+      const maxDate = dates.reduce((a, b) => a > b ? a : b);
+      const toInputFormat = (d) => {
+        const m = d.match(/(\d+)\/(\d+)\/(\d+)/);
+        if (m) return `${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
+        return d;
+      };
+      document.getElementById('copyArea').innerHTML = `
+        <div class="title">馃搮 閫夋嫨瑕佸鍑虹殑鏃ユ湡锛?/div>
+        <div class="date-pick-area">
+          <input type="date" id="datePicker" class="search" style="max-width:200px;"
+            min="${toInputFormat(minDate)}" max="${toInputFormat(maxDate)}">
+          <button class="search-btn" onclick="exportByDatePicker()">瀵煎嚭</button>
+        </div>
+        <div id="mdResult"></div>
+      `;
+    }
+
+    function exportByDatePicker() {
+      const dateInput = document.getElementById('datePicker').value;
+      if (!dateInput) {
+        alert('璇烽€夋嫨鏃ユ湡');
+        return;
+      }
+      const date = dateInput.replace(/^(\d+)-(\d+)-(\d+)$/, (_, y, m, d) => `${y}/${m}/${d}`);
+      exportDateMD(date);
+    }
+
+    function exportDateMD(date) {
+      const entries = getDiaries().filter(d => d.date === date);
+      let md = `# 鎴戠殑鏃ヨ\n\n## 馃搮 ${date}\n\n`;
+      entries.forEach(d => {
+        const m = d.time.match(/(\d{1,2}:\d{2}):\d{2}/);
+        const t = m ? m[1] : d.time;
+        const content = d.content.trim();
+        const isTodo = /^[銆怽[].*?[銆慭]]|\[.\]|\[x\]|^\d+[.銆乚\s*(寰呭姙|TODO|璁板緱|蹇呴』|搴旇|瑕佸仛|寰呭仛)|^(鎻愪氦|闂畖鎵撶數璇潀鍙戦偖浠秥鑱旂郴|鎵緗缁檤瀹夋帓|鍑嗗|瀹屾垚|纭|璺熻繘|澶勭悊|鏌ヨ)/.test(content);
+        const emoji = isTodo ? '[ ]' : '馃摑';
+        md += `- ${emoji} ${t} ${content}\n\n`;
+      });
+
+      document.getElementById('mdResult').innerHTML = `
+        <div class="title" style="margin-top:15px;">馃搵 MD 鏂囨湰锛堥暱鎸夊鍒讹級锛?/div>
+        <div class="copy-box" id="mdContent">${md}</div>
+        <button onclick="copyMdText()" style="margin-top:10px; background:#4c84ff;">馃搵 涓€閿鍒?/button>
+      `;
+    }
+
+    function copyMdText() {
+      const text = document.getElementById('mdContent').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('鉁?宸插鍒跺埌鍓创鏉匡紒');
+      }).catch(() => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert('鉁?宸插鍒跺埌鍓创鏉匡紒');
+      });
+    }
+
+    // 娓呯┖
+    function clearAllDiaries() {
+      if (!confirm('鈿狅笍 纭畾瑕佹竻绌烘墍鏈夋棩璁板悧锛熸鎿嶄綔涓嶅彲鎭㈠锛?)) return;
+      localStorage.setItem('diaries', '[]');
+      renderList();
+      document.getElementById('summaryArea').innerHTML = '';
+      document.getElementById('copyArea').innerHTML = '';
+      syncToGist();
+      alert('鉁?鎵€鏈夋棩璁板凡娓呯┖锛?);
+    }
+
+    // 鍚姩
+    renderList();
+    initSync();
+  </script>
+</body>
+</html>
