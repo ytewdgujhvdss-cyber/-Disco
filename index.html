@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>国航飞行工具箱</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,"Noto Sans SC","Microsoft YaHei",sans-serif;
+  background:#fff;color:#1d1d1f;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── 导航栏 ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(0,0,0,.8);
+  backdrop-filter:blur(40px) saturate(180%);
+  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.nav-inner{
+  max-width:1200px;margin:0 auto;padding:0 24px;
+  display:flex;align-items:center;height:52px;
+}
+.nav-logo{
+  display:flex;align-items:center;gap:10px;
+  font-size:14px;font-weight:600;color:#fff;letter-spacing:1px;
+}
+.nav-logo .badge{
+  background:#c8102e;color:#fff;font-size:10px;padding:2px 7px;border-radius:3px;font-weight:700;letter-spacing:1px;
+}
+.nav-links{margin-left:auto;display:flex;gap:28px}
+.nav-links a{color:rgba(255,255,255,.7);text-decoration:none;font-size:12px;letter-spacing:.5px;transition:color .2s}
+.nav-links a:hover{color:#fff}
+
+/* ── 英雄区 ── */
+.hero{
+  position:relative;height:100vh;min-height:700px;
+  display:flex;align-items:center;justify-content:center;
+  background:#000;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background-image:url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=2074&auto=format&fit=crop');
+  background-size:cover;background-position:center 30%;
+  opacity:.55;
+  transform:scale(1.05);
+  transition:transform 8s ease;
+}
+.hero:hover .hero-bg{transform:scale(1)}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,
+    rgba(0,0,0,.45) 0%,
+    rgba(0,0,0,.35) 50%,
+    rgba(0,0,0,.75) 100%
+  );
+}
+.hero-content{
+  position:relative;z-index:2;text-align:center;padding:0 24px;
+  animation:fadeUp 1.2s ease forwards;
+}
+@keyframes fadeUp{
+  0%{opacity:0;transform:translateY(30px)}
+  100%{opacity:1;transform:translateY(0)}
+}
+.hero-airline{
+  font-size:11px;letter-spacing:6px;color:rgba(255,255,255,.5);
+  margin-bottom:24px;text-transform:uppercase;
+}
+.hero-title{
+  font-size:clamp(36px,6vw,64px);font-weight:700;
+  color:#fff;letter-spacing:-.5px;line-height:1.1;margin-bottom:16px;
+}
+.hero-title span{color:#ff4d4d}
+.hero-sub{
+  font-size:clamp(16px,2vw,22px);color:rgba(255,255,255,.6);
+  font-weight:400;line-height:1.6;max-width:600px;margin:0 auto 36px;
+}
+.hero-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:#c8102e;color:#fff;border:none;
+  padding:14px 36px;border-radius:980px;
+  font-size:15px;font-weight:600;cursor:pointer;
+  transition:all .3s;text-decoration:none;
+  letter-spacing:.3px;
+}
+.hero-btn:hover{background:#a80d26;transform:translateY(-2px);box-shadow:0 12px 40px rgba(200,16,46,.3)}
+.hero-btn-outline{
+  display:inline-flex;align-items:center;gap:10px;
+  background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);
+  padding:14px 36px;border-radius:980px;
+  font-size:15px;font-weight:500;cursor:pointer;
+  transition:all .3s;text-decoration:none;margin-left:12px;
+}
+.hero-btn-outline:hover{background:rgba(255,255,255,.1);border-color:#fff}
+.scroll-indicator{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  color:rgba(255,255,255,.3);font-size:10px;letter-spacing:3px;
+  animation:bounceDown 2s ease infinite;
+}
+@keyframes bounceDown{
+  0%,100%{transform:translateX(-50%) translateY(0)}
+  50%{transform:translateX(-50%) translateY(8px)}
+}
+.scroll-indicator .line{width:1px;height:30px;background:rgba(255,255,255,.2)}
+
+/* ── 通用 ── */
+.section{padding:100px 24px}
+.section-inner{max-width:1100px;margin:0 auto}
+.section-label{
+  font-size:11px;letter-spacing:4px;color:#c8102e;
+  text-transform:uppercase;margin-bottom:12px;font-weight:600;
+}
+.section h2{
+  font-size:clamp(28px,4vw,48px);font-weight:700;
+  letter-spacing:-.3px;margin-bottom:16px;
+}
+.section .lead{
+  font-size:18px;color:#6e6e73;line-height:1.7;max-width:640px;margin-bottom:48px;
+}
+
+/* ── 工具卡片 ── */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+
+.tool-card{
+  background:#f5f5f7;border-radius:18px;padding:32px 28px;
+  text-decoration:none;color:inherit;display:block;
+  transition:all .35s ease;
+  position:relative;overflow:hidden;
+}
+.tool-card:hover{
+  background:#e8e8ed;
+  transform:translateY(-4px);
+  box-shadow:0 20px 60px rgba(0,0,0,.1);
+}
+.tool-card .icon{font-size:36px;margin-bottom:16px}
+.tool-card h3{font-size:17px;font-weight:600;margin-bottom:8px}
+.tool-card p{font-size:13px;color:#6e6e73;line-height:1.6}
+.tool-card .tag{
+  display:inline-block;margin-top:14px;
+  font-size:10px;padding:3px 10px;border-radius:980px;
+  background:#fff;color:#6e6e73;font-weight:500;letter-spacing:.3px;
+}
+.tool-card .arrow{
+  position:absolute;right:24px;top:32px;
+  font-size:18px;color:#c8c8cc;transition:all .3s;
+}
+.tool-card:hover .arrow{color:#c8102e;transform:translateX(4px)}
+
+/* ── 关于 ── */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+@media(max-width:700px){.about-grid{grid-template-columns:1fr;gap:32px}}
+.about-text p{font-size:15px;color:#6e6e73;line-height:1.8;margin-bottom:16px}
+.about-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.about-stat{text-align:center;padding:24px;background:#f5f5f7;border-radius:14px}
+.about-stat .num{font-size:32px;font-weight:700;color:#1d1d1f}
+.about-stat .lbl{font-size:12px;color:#6e6e73;margin-top:4px}
+
+/* ── 底部 ── */
+.footer{
+  background:#f5f5f7;border-top:1px solid #d2d2d7;
+  padding:32px 24px;text-align:center;
+}
+.footer-inner{max-width:1100px;margin:0 auto}
+.footer p{font-size:11px;color:#86868b;letter-spacing:.3px;line-height:1.8}
+.footer .brand{font-size:12px;color:#6e6e73;margin-bottom:8px}
+
+/* ── 响应式 ── */
+@media(max-width:700px){
+  .nav-links{display:none}
+  .hero-btn-outline{display:none}
+  .section{padding:64px 20px}
+}
+
+/* ── 从英雄区平滑滚动 ── */
+html{scroll-behavior:smooth}
+</style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <span class="badge">★</span>
+      <span>Air China 飞行工具箱</span>
+    </div>
+    <div class="nav-links">
+      <a href="#tools">工具箱</a>
+      <a href="#about">关于</a>
+    </div>
+  </div>
+</nav>
+
+<!-- 英雄区 -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-airline">Air China · 中国国际航空</div>
+    <h1 class="hero-title">
+      飞行运行<br><span>辅助工具</span>
+    </h1>
+    <p class="hero-sub">
+      专为飞行员与运行控制团队打造的数字化工具集，<br>
+      覆盖起飞标准查询、着陆检查、值勤计算等核心场景。
+    </p>
+    <div>
+      <a href="#tools" class="hero-btn">浏览工具 →</a>
+      <a href="#about" class="hero-btn-outline">了解更多</a>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <span>SCROLL</span>
+    <div class="line"></div>
+  </div>
+</section>
+
+<!-- 工具区 -->
+<section class="section" id="tools">
+  <div class="section-inner">
+    <div class="section-label">工具集</div>
+    <h2>飞行运行工具箱</h2>
+    <p class="lead">六款专业工具，助力飞行运行全流程。</p>
+
+    <div class="tools-grid">
+      <a class="tool-card" href="最低起飞标准交互式查询系统.html">
+        <div class="icon">🛫</div>
+        <span class="arrow">→</span>
+        <h3>最低起飞标准查询</h3>
+        <p>交互式查询系统，快速检索各机场与机型的最低起飞标准参数。</p>
+        <span class="tag">起飞标准</span>
+      </a>
+
+      <a class="tool-card" href="飞行仪表规则着陆最低标准检查工具.html">
+        <div class="icon">🛬</div>
+        <span class="arrow">→</span>
+        <h3>着陆最低标准检查</h3>
+        <p>仪表飞行规则着陆最低标准检查工具，辅助核查进近着陆条件。</p>
+        <span class="tag">着陆标准</span>
+      </a>
+
+      <a class="tool-card" href="深航飞行运行总手册-值勤期计算器.html">
+        <div class="icon">⏱️</div>
+        <span class="arrow">→</span>
+        <h3>值勤期计算器</h3>
+        <p>依据飞行运行总手册，自动计算飞行员值勤期时限与休息要求。</p>
+        <span class="tag">值勤管理</span>
+      </a>
+
+      <a class="tool-card" href="航班执行流程时间轴.html">
+        <div class="icon">📅</div>
+        <span class="arrow">→</span>
+        <h3>航班执行流程时间轴</h3>
+        <p>可视化展示航班执行全流程节点与时间安排，各阶段任务一览。</p>
+        <span class="tag">流程管理</span>
+      </a>
+
+      <a class="tool-card" href="word对比工具.html">
+        <div class="icon">📄</div>
+        <span class="arrow">→</span>
+        <h3>Word 文档差异对比</h3>
+        <p>上传两份 .docx 文档，逐表逐行逐单元格对比差异，纯本地处理。</p>
+        <span class="tag">文档工具</span>
+      </a>
+
+      <a class="tool-card" href="智慧飞行项目_PPT工具.html">
+        <div class="icon">📊</div>
+        <span class="arrow">→</span>
+        <h3>思维导图转 PPT</h3>
+        <p>导入 XMind、MindManager 或 Markdown，一键生成 PPTX 演示文稿。</p>
+        <span class="tag">效率工具</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 关于区 -->
+<section class="section" id="about" style="background:#fafafa">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="about-text">
+        <div class="section-label">关于</div>
+        <h2>更安全的飞行，<br>更高效的管理</h2>
+        <p>
+          我们致力于为飞行员与运行控制团队提供简洁、高效的数字化工具。
+          所有工具均为纯浏览器本地运行，无需安装，无需上传数据至服务器。
+        </p>
+        <p>
+          从起飞标准到值勤管理，从文档对比到 PPT 生成，一站式覆盖飞行运行中的常见需求。
+        </p>
+      </div>
+      <div class="about-stats">
+        <div class="about-stat">
+          <div class="num">6</div>
+          <div class="lbl">专业工具</div>
+        </div>
+        <div class="about-stat">
+          <div class="num">100%</div>
+          <div class="lbl">本地运行</div>
+        </div>
+        <div class="about-stat">
+          <div class="num">0</div>
+          <div class="lbl">数据上传</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 底部 -->
+<footer class="footer">
+  <div class="footer-inner">
+    <p class="brand">★ Air China · 飞行工具箱</p>
+    <p>所有工具均在浏览器本地运行，不上传任何数据至服务器。</p>
+    <p style="margin-top:6px">© 2026 国航飞行工具箱 · All tools run locally in your browser</p>
+  </div>
+</footer>
+
+</body>
+</html>
