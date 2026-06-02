@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>智慧飞行 — 中航集团数字化建设成果</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0A0E1A;
+  --bg-dark: #0D1322;
+  --bg-card: rgba(13,19,34,0.85);
+  --primary: #1A73E8;
+  --primary-glow: #4FC3F7;
+  --accent: #00E5FF;
+  --gold: #FFD700;
+  --text-primary: #E8EDF5;
+  --text-secondary: #8892A4;
+  --text-dim: #4A5568;
+  --border-subtle: rgba(26,115,232,0.2);
+  --font-cn: 'Noto Sans SC',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-en: 'Space Grotesk','JetBrains Mono',monospace;
+  --font-mono: 'JetBrains Mono',monospace;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-cn);background:var(--bg-deep);color:var(--text-primary);overflow-x:hidden}
+.snap-container{height:100vh;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;-ms-overflow-style:none}
+.snap-container::-webkit-scrollbar{display:none}
+.progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent));transform-origin:left;transform:scaleX(0);z-index:1001;transition:transform .1s}
+.nav-dots{position:fixed;right:24px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:1000}
+.nav-dot{width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);background:transparent;cursor:pointer;transition:all .3s;padding:0}
+.nav-dot.active{background:var(--accent);border-color:var(--accent);box-shadow:0 0 8px var(--accent)}
+.section{position:relative;height:100vh;width:100%;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 80px;overflow:hidden}
+.section-inner{position:relative;z-index:2;width:100%;max-width:1360px;margin:0 auto}
+.sec-label{font-family:var(--font-en);font-size:14px;letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin-bottom:16px;opacity:0;transform:translateY(20px);transition:all .6s}
+.sec-label.show{opacity:1;transform:translateY(0)}
+.sec-title{font-size:64px;font-weight:900;line-height:1.15;margin-bottom:24px;opacity:0;transform:translateY(30px);transition:all .7s .15s}
+.sec-title.show{opacity:1;transform:translateY(0)}
+.sec-sub{font-size:20px;color:var(--text-secondary);font-weight:300;line-height:1.6;max-width:720px;opacity:0;transform:translateY(20px);transition:all .6s .3s}
+.sec-sub.show{opacity:1;transform:translateY(0)}
+#p1{padding:0;background:var(--bg-deep)}
+#p1 canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.hero-overlay{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(10,14,26,.3) 0%,rgba(10,14,26,.7) 70%,var(--bg-deep) 100%);z-index:1}
+.hero-content{position:relative;z-index:2;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px}
+.hero-badge{display:inline-block;font-family:var(--font-en);font-size:13px;letter-spacing:6px;color:var(--accent);border:1px solid rgba(0,229,255,.3);padding:8px 20px;border-radius:4px;margin-bottom:12px;opacity:0;animation:fadeDown 1s .5s forwards}
+.hero-title{font-size:clamp(64px,10vw,120px);font-weight:900;letter-spacing:8px;background:linear-gradient(135deg,#E8EDF5 0%,var(--primary-glow) 50%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;animation:fadeUp 1s .8s forwards}
+.hero-sub{font-size:clamp(20px,2.5vw,32px);font-weight:300;color:var(--text-secondary);letter-spacing:4px;margin-top:8px;opacity:0;animation:fadeUp 1s 1.1s forwards}
+.hero-tagline{font-size:16px;color:var(--text-dim);margin-top:8px;opacity:0;animation:fadeUp 1s 1.4s forwards}
+.hero-scroll{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text-dim);font-size:13px;letter-spacing:2px;animation:bounce 2s ease-in-out infinite;z-index:3}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+#p2{background:linear-gradient(135deg,var(--bg-deep),var(--bg-dark))}
+.timeline-wrapper{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.timeline{position:relative;padding-left:32px}
+.timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--primary),var(--accent),transparent)}
+.timeline-item{position:relative;margin-bottom:24px;padding-left:28px;opacity:0;transform:translateX(-20px);transition:all .5s}
+.timeline-item.show{opacity:1;transform:translateX(0)}
+.timeline-item::before{content:'';position:absolute;left:-27px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--primary);border:2px solid var(--accent)}
+.timeline-item.future::before{background:transparent;border-color:var(--gold)}
+.timeline-item.future .tl-date{color:var(--gold)}
+.tl-date{font-family:var(--font-mono);font-size:14px;color:var(--accent);margin-bottom:4px}
+.tl-text{font-size:18px;font-weight:400}
+.tl-extra{font-size:14px;color:var(--text-secondary);margin-top:2px}
+.timeline-right{padding:40px}
+.timeline-right .brand-large{font-family:var(--font-en);font-size:72px;font-weight:700;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:20px}
+.timeline-right .brand-desc{font-size:20px;color:var(--text-secondary);line-height:1.8}
+#p3{background:radial-gradient(ellipse at 20% 80%,rgba(26,115,232,.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(0,229,255,.06) 0%,transparent 50%),var(--bg-deep)}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-bottom:48px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;padding:40px 32px;text-align:center;backdrop-filter:blur(10px);opacity:0;transform:translateY(30px);transition:all .6s}
+.kpi-card.show{opacity:1;transform:translateY(0)}
+.kpi-card:nth-child(1){transition-delay:.1s}
+.kpi-card:nth-child(2){transition-delay:.25s}
+.kpi-card:nth-child(3){transition-delay:.4s}
+.kpi-number{font-family:var(--font-en);font-size:clamp(56px,6vw,80px);font-weight:700;background:linear-gradient(135deg,var(--primary-glow),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:8px}
+.kpi-number .kpi-unit{font-size:28px}
+.kpi-label{font-size:16px;color:var(--text-secondary)}
+.feature-tags{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:32px}
+.feature-tag{padding:8px 20px;border-radius:20px;border:1px solid var(--border-subtle);font-size:14px;color:var(--text-secondary);background:rgba(26,115,232,.08);opacity:0;transform:translateY(20px);transition:all .4s}
+.feature-tag.show{opacity:1;transform:translateY(0)}
+.feature-tag:nth-child(1){transition-delay:.5s}
+.feature-tag:nth-child(2){transition-delay:.6s}
+.feature-tag:nth-child(3){transition-delay:.7s}
+.feature-tag:nth-child(4){transition-delay:.8s}
+.feature-tag:nth-child(5){transition-delay:.9s}
+.coverage-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;opacity:0;transition:all .5s 1s}
+.coverage-row.show{opacity:1}
+.coverage-badge{padding:4px 14px;border-radius:4px;font-size:13px;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);color:var(--gold)}
+#p4{background:var(--bg-dark)}
+.case-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:32px}
+.case-col{padding:32px;border-radius:12px;border:1px solid var(--border-subtle);background:var(--bg-card);backdrop-filter:blur(10px);opacity:0;transform:translateY(30px);transition:all .6s}
+.case-col.show{opacity:1;transform:translateY(0)}
+.case-col.before{border-color:rgba(255,255,255,.08);transition-delay:.1s}
+.case-col.after{border-color:var(--accent);transition-delay:.3s}
+.case-col-header{font-size:28px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.case-col.before .case-col-header{color:var(--text-secondary)}
+.case-col.after .case-col-header{color:var(--accent)}
+.case-status{font-size:13px;padding:3px 12px;border-radius:4px;font-weight:400}
+.case-status.before-status{background:rgba(255,255,255,.06);color:var(--text-dim)}
+.case-status.after-status{background:rgba(0,229,255,.1);color:var(--accent)}
+.case-desc{font-size:15px;color:var(--text-secondary);line-height:1.7;margin:16px 0 20px}
+.case-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.case-list li{display:flex;align-items:flex-start;gap:10px;font-size:15px;color:var(--text-secondary);line-height:1.5}
+.case-list li::before{content:'✗';color:#FF5252;font-size:14px;flex-shrink:0;margin-top:2px}
+.case-col.after .case-list li::before{content:'✓';color:#00E676}
+.case-bottom{margin-top:32px;text-align:center;opacity:0;transition:all .5s .5s}
+.case-bottom.show{opacity:1}
+.case-timeline-bar{display:flex;align-items:center;justify-content:center;gap:16px;font-size:14px;color:var(--text-secondary)}
+.case-timeline-bar .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.case-timeline-bar .line{flex:0 1 80px;height:1px;background:var(--border-subtle)}
+.case-timeline-bar .date{font-family:var(--font-mono);font-size:13px;color:var(--accent)}
+#p5{background:radial-gradient(ellipse at 50% 0%,rgba(26,115,232,.06) 0%,transparent 50%),var(--bg-deep)}
+.value-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:32px}
+.value-card{text-align:center;padding:40px 24px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-card);backdrop-filter:blur(10px);opacity:0;transform:translateY(30px);transition:all .5s}
+.value-card.show{opacity:1;transform:translateY(0)}
+.value-card:nth-child(1){transition-delay:.1s}
+.value-card:nth-child(2){transition-delay:.2s}
+.value-card:nth-child(3){transition-delay:.3s}
+.value-card:nth-child(4){transition-delay:.4s}
+.value-icon{width:56px;height:56px;margin:0 auto 16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px}
+.value-icon.safety{background:rgba(0,229,255,.1);color:var(--accent)}
+.value-icon.efficiency{background:rgba(26,115,232,.1);color:var(--primary-glow)}
+.value-icon.data{background:rgba(255,215,0,.1);color:var(--gold)}
+.value-icon.decision{background:rgba(0,230,118,.1);color:#00E676}
+.value-title{font-size:20px;font-weight:700;margin-bottom:8px}
+.value-desc{font-size:14px;color:var(--text-secondary);line-height:1.6}
+#p6{background:linear-gradient(135deg,var(--bg-deep),var(--bg-dark))}
+.arch-grid{display:grid;grid-template-rows:repeat(4,auto);gap:12px;margin-top:32px}
+.arch-layer{display:grid;grid-template-columns:140px 1fr;gap:20px;align-items:center;opacity:0;transform:translateY(20px);transition:all .5s}
+.arch-layer.show{opacity:1;transform:translateY(0)}
+.arch-layer:nth-child(1){transition-delay:.1s}
+.arch-layer:nth-child(2){transition-delay:.2s}
+.arch-layer:nth-child(3){transition-delay:.3s}
+.arch-layer:nth-child(4){transition-delay:.4s}
+.arch-label{font-family:var(--font-en);font-size:13px;letter-spacing:2px;color:var(--accent);text-align:right;padding-right:16px;border-right:2px solid var(--accent)}
+.arch-items{display:flex;flex-wrap:wrap;gap:8px}
+.arch-item{padding:10px 18px;border-radius:6px;font-size:14px;border:1px solid var(--border-subtle);background:rgba(26,115,232,.06);transition:all .3s}
+.arch-item.highlight{background:rgba(0,229,255,.1);border-color:var(--accent);color:var(--accent)}
+.arch-legend{margin-top:24px;text-align:center;font-size:13px;color:var(--text-dim);opacity:0;transition:all .5s .5s}
+.arch-legend.show{opacity:1}
+#p7{background:radial-gradient(ellipse at 80% 50%,rgba(0,229,255,.04) 0%,transparent 50%),var(--bg-deep)}
+.phase2-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:32px}
+.phase2-card{padding:20px 16px;border-radius:10px;border:1px solid var(--border-subtle);background:var(--bg-card);text-align:center;font-size:14px;line-height:1.4;backdrop-filter:blur(10px);opacity:0;transform:translateY(24px);transition:all .4s}
+.phase2-card.show{opacity:1;transform:translateY(0)}
+.phase2-card .p2-num{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);margin-bottom:4px}
+.phase2-card .p2-icon{font-size:22px;margin-bottom:8px}
+.phase2-card.center-piece{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:16px;padding:16px;border-color:var(--accent);background:rgba(0,229,255,.04)}
+.phase2-card.center-piece .p2-big{font-family:var(--font-en);font-size:36px;font-weight:700;color:var(--accent)}
+.phase2-card.center-piece .p2-text{font-size:16px;color:var(--text-primary)}
+#p8{background:var(--bg-dark)}
+.future-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:32px}
+.future-card{padding:32px;border-radius:12px;border:1px solid var(--border-subtle);background:var(--bg-card);backdrop-filter:blur(10px);opacity:0;transform:translateY(30px);transition:all .5s}
+.future-card.show{opacity:1;transform:translateY(0)}
+.future-card:nth-child(1){transition-delay:.1s}
+.future-card:nth-child(2){transition-delay:.25s}
+.future-card:nth-child(3){transition-delay:.4s}
+.future-phase{font-family:var(--font-mono);font-size:12px;letter-spacing:2px;color:var(--accent);margin-bottom:8px}
+.future-title{font-size:24px;font-weight:700;margin-bottom:16px}
+.future-items{display:flex;flex-direction:column;gap:10px}
+.future-item{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--text-secondary)}
+.future-item::before{content:'→';color:var(--accent);font-size:13px}
+#p9{background:radial-gradient(ellipse at 30% 70%,rgba(255,215,0,.03) 0%,transparent 50%),var(--bg-deep)}
+.honors-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:32px}
+.honor-card{padding:32px 24px;border-radius:12px;border:1px solid var(--border-subtle);background:var(--bg-card);text-align:center;backdrop-filter:blur(10px);opacity:0;transform:translateY(30px);transition:all .5s}
+.honor-card.show{opacity:1;transform:translateY(0)}
+.honor-card:nth-child(1){transition-delay:.1s}
+.honor-card:nth-child(2){transition-delay:.25s}
+.honor-card:nth-child(3){transition-delay:.4s}
+.honor-icon{font-size:36px;margin-bottom:12px}
+.honor-name{font-size:18px;font-weight:700;margin-bottom:6px}
+.honor-org{font-size:14px;color:var(--text-secondary)}
+.honor-note{grid-column:1/-1;text-align:center;font-size:14px;color:var(--text-dim);padding:20px;border:1px dashed var(--border-subtle);border-radius:8px}
+#p10{background:linear-gradient(135deg,var(--bg-deep) 0%,#050810 100%)}
+.footer-content{text-align:center}
+.footer-logo{font-family:var(--font-en);font-size:64px;font-weight:700;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;opacity:0;animation:fadeUp 1s .3s forwards}
+.footer-sub{font-size:20px;color:var(--text-secondary);margin-bottom:32px;opacity:0;animation:fadeUp 1s .6s forwards}
+.footer-meta{font-size:14px;color:var(--text-dim);line-height:1.8;opacity:0;animation:fadeUp 1s .9s forwards}
+.footer-divider{width:60px;height:1px;background:var(--border-subtle);margin:20px auto}
+@media(max-width:1024px){
+  .section{padding:40px 32px}
+  .timeline-wrapper{grid-template-columns:1fr;gap:32px}
+  .case-grid{grid-template-columns:1fr;gap:24px}
+  .value-grid{grid-template-columns:repeat(2,1fr);gap:16px}
+  .phase2-grid{grid-template-columns:repeat(2,1fr)}
+  .future-grid{grid-template-columns:1fr;gap:20px}
+  .honors-grid{grid-template-columns:1fr}
+  .sec-title{font-size:40px}
+  .kpi-grid{grid-template-columns:1fr;gap:16px}
+  .arch-layer{grid-template-columns:90px 1fr;gap:12px}
+}
+@media(max-width:640px){
+  .section{padding:24px 20px}
+  .nav-dots{right:12px;gap:8px}
+  .nav-dot{width:8px;height:8px}
+  .sec-title{font-size:32px}
+  .hero-title{font-size:48px;letter-spacing:4px}
+  .hero-sub{font-size:16px}
+  .value-grid{grid-template-columns:1fr}
+  .phase2-grid{grid-template-columns:1fr}
+  .timeline-right .brand-large{font-size:48px}
+  .arch-layer{grid-template-columns:1fr;gap:6px}
+  .arch-label{text-align:left;border-right:none;border-bottom:1px solid var(--accent);padding-bottom:4px}
+}
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+<nav class="nav-dots" id="navDots">
+  <button class="nav-dot active" data-index="0" aria-label="首页"></button>
+  <button class="nav-dot" data-index="1" aria-label="项目概况"></button>
+  <button class="nav-dot" data-index="2" aria-label="建设成果"></button>
+  <button class="nav-dot" data-index="3" aria-label="案例展示"></button>
+  <button class="nav-dot" data-index="4" aria-label="项目价值"></button>
+  <button class="nav-dot" data-index="5" aria-label="系统架构"></button>
+  <button class="nav-dot" data-index="6" aria-label="二期规划"></button>
+  <button class="nav-dot" data-index="7" aria-label="未来规划"></button>
+  <button class="nav-dot" data-index="8" aria-label="荣誉与推广"></button>
+  <button class="nav-dot" data-index="9" aria-label="收尾"></button>
+</nav>
+<div class="snap-container" id="snapContainer">
+<section class="section" id="p1">
+  <canvas id="heroCanvas"></canvas>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge">AIR CHINA · CREW TASK SMART-SOLUTION</div>
+    <div class="hero-title">智慧飞行</div>
+    <div class="hero-sub">打造飞行运行数字化新生态</div>
+    <div class="hero-tagline">以飞行员为中心 · 以数据为驱动 · 以安全为底线</div>
+  </div>
+  <div class="hero-scroll"><span>↓</span><span>探索智慧飞行</span></div>
+</section>
+<section class="section" id="p2">
+  <div class="section-inner">
+    <div class="sec-label">MILESTONES</div>
+    <div class="sec-title">项目概况</div>
+    <div class="sec-sub">从立项到上线，智慧飞行的数字化转型之路</div>
+    <div class="timeline-wrapper" style="margin-top:32px">
+      <div class="timeline">
+        <div class="timeline-item"><div class="tl-date">2024</div><div class="tl-text">项目立项</div><div class="tl-extra">智慧飞行（CTS）项目正式启动</div></div>
+        <div class="timeline-item"><div class="tl-date">2025</div><div class="tl-text">一期建设启动</div><div class="tl-extra">数字任务书 · 数字模拟机记录本</div></div>
+        <div class="timeline-item"><div class="tl-date">2026.01</div><div class="tl-text">数字任务书试运行</div><div class="tl-extra">覆盖四大空勤工种</div></div>
+        <div class="timeline-item"><div class="tl-date">2026.03</div><div class="tl-text">数字任务书正式上线</div><div class="tl-extra">国航股份+北大内约2.7万空勤人员</div></div>
+        <div class="timeline-item"><div class="tl-date">2026.05</div><div class="tl-text">数字模拟机记录本试运行</div><div class="tl-extra">飞行训练数据电子化记录与管理</div></div>
+        <div class="timeline-item"><div class="tl-date">2026.07</div><div class="tl-text">全面替代纸质记录本</div><div class="tl-extra">数据与质量系统、云执照等互通</div></div>
+        <div class="timeline-item future"><div class="tl-date">未来</div><div class="tl-text">AI 智慧飞行平台</div><div class="tl-extra">以数据为基石的智能化空勤业务体系</div></div>
+      </div>
+      <div class="timeline-right">
+        <div class="brand-large">C.T.S.</div>
+        <div class="brand-desc"><strong>C</strong>rew <strong>T</strong>ask <strong>S</strong>mart-solution<br><br>中航集团空勤业务一体化数智化整体解决方案<br>涵盖飞行、客舱、空保、机务四大专业工种<br>覆盖全集团：国航股份 · 北大内 · 国货航 · 深航 · 山航 · 昆航<br><br><span style="color:var(--accent)">从纸质到电子 · 从手写到数字 · 从线下到线上</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section" id="p3">
+  <div class="section-inner">
+    <div class="sec-label show">ACHIEVEMENTS</div>
+    <div class="sec-title show">建设成果</div>
+    <div class="sec-sub show">一期建设已全面上线，覆盖全集团四大空勤工种</div>
+    <div class="kpi-grid" style="margin-top:32px">
+      <div class="kpi-card"><div class="kpi-number"><span class="kpi-val" data-target="2.7">0</span><span class="kpi-unit">万+</span></div><div class="kpi-label">注册空勤人员</div></div>
+      <div class="kpi-card"><div class="kpi-number"><span class="kpi-val" data-target="586">0</span><span class="kpi-unit">万+</span></div><div class="kpi-label">任务书处理次数</div></div>
+      <div class="kpi-card"><div class="kpi-number"><span class="kpi-val" data-target="120">0</span><span class="kpi-unit">TB+</span></div><div class="kpi-label">飞行运行数据量</div></div>
+    </div>
+    <div class="feature-tags">
+      <span class="feature-tag">数字任务书</span>
+      <span class="feature-tag">数字模拟机记录本</span>
+      <span class="feature-tag">云执照</span>
+      <span class="feature-tag">训练管理</span>
+      <span class="feature-tag">空勤乘机</span>
+    </div>
+    <div class="coverage-row">
+      <span class="coverage-badge">飞行员</span>
+      <span class="coverage-badge">乘务员</span>
+      <span class="coverage-badge">航空安全员</span>
+      <span class="coverage-badge">机务工程师</span>
+      <span style="color:var(--text-dim);margin:0 4px">|</span>
+      <span class="coverage-badge">国航股份</span>
+      <span class="coverage-badge">北大内</span>
+      <span class="coverage-badge">国货航</span>
+      <span class="coverage-badge">深圳航空</span>
+      <span class="coverage-badge">山东航空</span>
+      <span class="coverage-badge">昆明航空</span>
+    </div>
+  </div>
+</section>
+<section class="section" id="p4">
+  <div class="section-inner">
+    <div class="sec-label">CASE STUDY</div>
+    <div class="sec-title">数字模拟机记录本</div>
+    <div class="sec-sub">从纸质到数字化，飞行训练记录的革命性升级</div>
+    <div class="case-grid">
+      <div class="case-col before">
+        <div class="case-col-header">建设前<span class="case-status before-status">纸质时代</span></div>
+        <div class="case-desc">飞行训练数据依靠纸质记录本手工填写</div>
+        <ul class="case-list">
+          <li>手工填写，字迹潦草辨识困难</li>
+          <li>数据分散存放，难以统一管理</li>
+          <li>历史记录查询效率极低</li>
+          <li>数据统计完全依赖人工</li>
+        </ul>
+      </div>
+      <div class="case-col after">
+        <div class="case-col-header">建设后<span class="case-status after-status">数字化</span></div>
+        <div class="case-desc">移动端在线填报，数据自动汇总云端存储</div>
+        <ul class="case-list">
+          <li>移动端在线填写，操作便捷</li>
+          <li>电子签字确认，全程留痕可追溯</li>
+          <li>数据自动汇总，一键生成统计报表</li>
+          <li>云端安全存储，与质量系统/云执照互通</li>
+        </ul>
+      </div>
+    </div>
+    <div class="case-bottom">
+      <div class="case-timeline-bar">
+        <span>2026.03 启动</span><span class="line"></span><span class="dot"></span><span class="date">2026.05 试运行</span><span class="dot"></span><span class="line"></span><span class="date">2026.07 正式替代</span>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section" id="p5">
+  <div class="section-inner">
+    <div class="sec-label">VALUE</div>
+    <div class="sec-title">项目价值</div>
+    <div class="sec-sub">数字化转型为飞行运行带来的核心价值</div>
+    <div class="value-grid">
+      <div class="value-card"><div class="value-icon safety">🛡</div><div class="value-title">安全提升</div><div class="value-desc">减少人为遗漏，降低安全风险<br>全程数字化留痕可追溯<br>自动校验与风险预警</div></div>
+      <div class="value-card"><div class="value-icon efficiency">⚡</div><div class="value-title">效率提升</div><div class="value-desc">减少纸质流转环节<br>任务处理从分钟级到秒级<br>多工种实时协同</div></div>
+      <div class="value-card"><div class="value-icon data">📊</div><div class="value-title">数据沉淀</div><div class="value-desc">形成飞行大数据资产<br>全集团运行数据统一汇聚<br>支撑科学分析决策</div></div>
+      <div class="value-card"><div class="value-icon decision">🎯</div><div class="value-title">决策支持</div><div class="value-desc">数据驾驶舱智能分析<br>辅助管理精准决策<br>为未来AI应用奠定基础</div></div>
+    </div>
+  </div>
+</section>
+<section class="section" id="p6">
+  <div class="section-inner">
+    <div class="sec-label">ARCHITECTURE</div>
+    <div class="sec-title">系统架构</div>
+    <div class="sec-sub">基于微服务架构、信创技术路线、中航云部署</div>
+    <div class="arch-grid">
+      <div class="arch-layer"><div class="arch-label">业务层</div><div class="arch-items"><span class="arch-item highlight">数字任务书</span><span class="arch-item highlight">数字模拟机记录本</span><span class="arch-item">云执照</span><span class="arch-item">训练管理</span><span class="arch-item">空勤乘机</span><span class="arch-item">安全管理</span></div></div>
+      <div class="arch-layer"><div class="arch-label">应用层</div><div class="arch-items"><span class="arch-item">移动端 APP</span><span class="arch-item">PC 端</span><span class="arch-item">PAD 端</span><span class="arch-item">数据大屏</span><span class="arch-item">统一门户</span></div></div>
+      <div class="arch-layer"><div class="arch-label">数据层</div><div class="arch-items"><span class="arch-item">GaussDB</span><span class="arch-item">数据中台</span><span class="arch-item">ODS</span><span class="arch-item">集团数仓</span><span class="arch-item">AI 服务</span></div></div>
+      <div class="arch-layer"><div class="arch-label">基础设施</div><div class="arch-items"><span class="arch-item">中航云</span><span class="arch-item">微服务架构</span><span class="arch-item">信创技术</span><span class="arch-item">统一认证</span><span class="arch-item">安全防护</span></div></div>
+    </div>
+    <div class="arch-legend">技术栈：微服务架构 · GaussDB 国产数据库 · 中航云部署 · 信创技术路线</div>
+  </div>
+</section>
+<section class="section" id="p7">
+  <div class="section-inner">
+    <div class="sec-label">PHASE Ⅱ</div>
+    <div class="sec-title">二期建设规划</div>
+    <div class="sec-sub">1+N 生态体系 · 全集团推广 · 覆盖航前/航中/航后全链条</div>
+    <div class="phase2-grid">
+      <div class="phase2-card"><div class="p2-icon">📋</div><div class="p2-num">模块 01</div><div>数字任务书<br>全集团推广</div></div>
+      <div class="phase2-card"><div class="p2-icon">✈️</div><div class="p2-num">模块 02</div><div>航前预先准备<br>数字化</div></div>
+      <div class="phase2-card"><div class="p2-icon">🎯</div><div class="p2-num">模块 03</div><div>航前直接准备<br>数字化</div></div>
+      <div class="phase2-card"><div class="p2-icon">🤝</div><div class="p2-num">模块 04</div><div>多工种航班<br>数字化协同</div></div>
+      <div class="phase2-card"><div class="p2-icon">🧳</div><div class="p2-num">模块 05</div><div>空勤乘机<br>全流程数字化</div></div>
+      <div class="phase2-card"><div class="p2-icon">⛽</div><div class="p2-num">模块 06</div><div>航油业务<br>全流程数字化</div></div>
+      <div class="phase2-card"><div class="p2-icon">🔄</div><div class="p2-num">模块 07-09</div><div>QBD / 云执照 / ELB<br>数据互通</div></div>
+      <div class="phase2-card"><div class="p2-icon">🪪</div><div class="p2-num">模块 10</div><div>登机证<br>全场景数字化</div></div>
+      <div class="phase2-card"><div class="p2-icon">🧩</div><div class="p2-num">模块 11</div><div>机组工具<br>一体化集成</div></div>
+      <div class="phase2-card center-piece"><span class="p2-big">1 + N</span><span class="p2-text">1 个基础应用（数字任务书）+ N 个空勤专业场景应用<br>构建跨工种、跨业务的一体化数字化空勤业务体系</span></div>
+    </div>
+  </div>
+</section>
+<section class="section" id="p8">
+  <div class="section-inner">
+    <div class="sec-label">FUTURE</div>
+    <div class="sec-title">未来规划</div>
+    <div class="sec-sub">从数字化到智能化，打造世界一流的空勤数智化体系</div>
+    <div class="future-grid">
+      <div class="future-card" style="border-color:var(--accent)"><div class="future-phase">PHASE Ⅱ · 当前</div><div class="future-title">能力深化</div><div class="future-items"><div class="future-item">云执照系统数据互通</div><div class="future-item">飞行员画像与能力评估</div><div class="future-item">数据驾驶舱智能分析</div><div class="future-item">全集团推广与业务覆盖</div></div></div>
+      <div class="future-card"><div class="future-phase">PHASE Ⅲ · 规划中</div><div class="future-title">AI 赋能</div><div class="future-items"><div class="future-item">AI 训练助手</div><div class="future-item">AI 风险预警系统</div><div class="future-item">智能知识库</div><div class="future-item">智能排班与资源调度</div></div></div>
+      <div class="future-card"><div class="future-phase">PHASE Ⅳ · 远景</div><div class="future-title">智慧运行</div><div class="future-items"><div class="future-item">数字飞行员 · 个性化画像</div><div class="future-item">数字机队 · 预测性维护</div><div class="future-item">智慧运行中心（IOC）</div><div class="future-item">空地互联 · 数字孪生</div></div></div>
+    </div>
+  </div>
+</section>
+<section class="section" id="p9">
+  <div class="section-inner">
+    <div class="sec-label">HONORS</div>
+    <div class="sec-title">荣誉与推广</div>
+    <div class="sec-sub">智慧飞行项目的行业认可与推广价值</div>
+    <div class="honors-grid">
+      <div class="honor-card"><div class="honor-icon">🏆</div><div class="honor-name">公司级创新项目</div><div class="honor-org">中航集团 · 数字化创新奖</div></div>
+      <div class="honor-card"><div class="honor-icon">📡</div><div class="honor-name">民航行业交流会</div><div class="honor-org">民航数字化建设成果展示</div></div>
+      <div class="honor-card"><div class="honor-icon">🌐</div><div class="honor-name">行业推广价值</div><div class="honor-org">可推广至全行业航空企业</div></div>
+      <div class="honor-note">📌 如有更多荣誉信息需要补充，请替换此处内容</div>
+    </div>
+  </div>
+</section>
+<section class="section" id="p10">
+  <div class="section-inner footer-content">
+    <div class="footer-logo">C.T.S.</div>
+    <div class="footer-sub">Crew Task Smart-solution</div>
+    <div class="footer-divider"></div>
+    <div class="footer-meta">中航集团 · 智慧飞行项目组<br>Air China Group · Smart Flight Digital Transformation<br><br>版权所有 © 2026</div>
+  </div>
+</section>
+</div>
+<script>
+(function(){
+'use strict';
+const container=document.getElementById('snapContainer');
+const sections=document.querySelectorAll('.section');
+const dots=document.querySelectorAll('.nav-dot');
+const progressBar=document.getElementById('progressBar');
+function updateNav(){
+  const scrollTop=container.scrollTop;
+  const total=container.scrollHeight-container.clientHeight;
+  progressBar.style.transform='scaleX('+(total>0?scrollTop/total:0)+')';
+  let idx=0;
+  sections.forEach((s,i)=>{const r=s.getBoundingClientRect();if(r.top<window.innerHeight*0.3)idx=i});
+  dots.forEach((d,i)=>d.classList.toggle('active',i===idx));
+  triggerAnimations();
+}
+let observer=null;
+function triggerAnimations(){
+  if(!observer){
+    observer=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting)en.target.classList.add('show')})},{threshold:.15});
+  }
+  const sel='.sec-label,.sec-title,.sec-sub,.timeline-item,.kpi-card,.feature-tag,.coverage-row,.case-col,.case-bottom,.value-card,.arch-layer,.arch-legend,.phase2-card,.future-card,.honor-card';
+  document.querySelectorAll(sel).forEach(el=>{if(!el.classList.contains('show'))observer.observe(el)});
+  document.querySelectorAll(sel+':not(.show)').forEach(el=>{const r=el.getBoundingClientRect();if(r.top<window.innerHeight*.85&&r.bottom>0)el.classList.add('show')});
+}
+container.addEventListener('scroll',updateNav);
+window.addEventListener('resize',updateNav);
+dots.forEach(d=>{d.addEventListener('click',()=>{const t=sections[parseInt(d.dataset.index,10)];if(t)t.scrollIntoView({behavior:'smooth'})})});
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();
+    const cur=Math.round(container.scrollTop/window.innerHeight);
+    const nxt=e.key==='ArrowDown'?cur+1:cur-1;
+    if(nxt>=0&&nxt<sections.length)sections[nxt].scrollIntoView({behavior:'smooth'});
+  }
+});
+let countersAnimated=false;
+function animateCounters(){
+  if(countersAnimated)return;
+  const vals=document.querySelectorAll('.kpi-val');
+  const rect=vals[0]?.closest('.kpi-card')?.getBoundingClientRect();
+  if(!rect||rect.top>window.innerHeight*.85)return;
+  countersAnimated=true;
+  vals.forEach(el=>{
+    const target=parseFloat(el.dataset.target);
+    const isFloat=target%1!==0;
+    const dur=2000;
+    const start=performance.now();
+    function tick(now){
+      const p=Math.min((now-start)/dur,1);
+      const v=1-Math.pow(1-p,3);
+      el.textContent=isFloat?(v*target).toFixed(1):Math.round(v*target);
+      if(p<1)requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+}
+const canvas=document.getElementById('heroCanvas');
+const ctx=canvas.getContext('2d');
+let W,H,stars=[],plane={x:0,y:0,angle:0,trail:[]},dataLines=[];
+function resizeCanvas(){
+  W=canvas.width=canvas.offsetWidth;
+  H=canvas.height=canvas.offsetHeight;
+  stars=Array.from({length:180},()=>({x:Math.random()*W,y:Math.random()*H,r:.3+Math.random()*1.2,alpha:.3+Math.random()*.7,ts:.005+Math.random()*.02,tp:Math.random()*Math.PI*2}));
+  dataLines=Array.from({length:8},()=>({sx:Math.random()*W,sy:Math.random()*H*.3,ex:Math.random()*W,ey:H*.5+Math.random()*H*.4,ph:Math.random()*100}));
+}
+let planeProgress=0;
+function updatePlane(){
+  planeProgress+=.0015;
+  if(planeProgress>1)planeProgress=0;
+  const t=planeProgress,cx=W*.5,cy=H*.55,rx=W*.3,ry=H*.2;
+  plane.x=cx+rx*Math.sin(t*Math.PI*2);
+  plane.y=cy+ry*Math.sin(t*Math.PI*4)*.5;
+  const pt=Math.max(0,t-.005);
+  plane.angle=Math.atan2(plane.y-(cy+ry*Math.sin(pt*Math.PI*4)*.5),plane.x-(cx+rx*Math.sin(pt*Math.PI*2)));
+  plane.trail.push({x:plane.x,y:plane.y});
+  if(plane.trail.length>80)plane.trail.shift();
+}
+function draw(time){
+  const r=document.getElementById('p1').getBoundingClientRect();
+  if(r.top<window.innerHeight&&r.bottom>0){
+    ctx.clearRect(0,0,W,H);
+    const bg=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,W*.7);
+    bg.addColorStop(0,'#0D1A2E');bg.addColorStop(.5,'#0A0E1A');bg.addColorStop(1,'#050810');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    stars.forEach(s=>{
+      const a=s.alpha*(.5+.5*Math.sin(time*s.ts+s.tp));
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${a})`;ctx.fill()
+    });
+    dataLines.forEach(l=>{
+      const off=(time*.3+l.ph)%200;
+      ctx.beginPath();ctx.moveTo(l.sx,l.sy);
+      ctx.quadraticCurveTo((l.sx+l.ex)/2+40,(l.sy+l.ey)/2,l.ex,l.ey);
+      ctx.strokeStyle=`rgba(0,229,255,${.05+.03*Math.sin(off*.05)})`;
+      ctx.lineWidth=1;ctx.setLineDash([4,8]);ctx.lineDashOffset=-off;ctx.stroke();ctx.setLineDash([]);
+    });
+    for(let i=0;i<15;i++){
+      const x=(Math.sin(time*.02+i*2.7)*.5+.5)*W,y=((time*.02+i*.3)%1)*H;
+      ctx.beginPath();ctx.arc(x,y,2,0,Math.PI*2);ctx.fillStyle=`rgba(79,195,247,${.15+.1*Math.sin(time*.03+i)})`;ctx.fill()
+    }
+    updatePlane();
+    if(plane.trail.length>1)for(let i=1;i<plane.trail.length;i++){
+      ctx.beginPath();ctx.moveTo(plane.trail[i-1].x,plane.trail[i-1].y);ctx.lineTo(plane.trail[i].x,plane.trail[i].y);
+      ctx.strokeStyle=`rgba(0,229,255,${(i/plane.trail.length)*.4})`;ctx.lineWidth=1.5;ctx.stroke()
+    }
+    const g=ctx.createRadialGradient(plane.x,plane.y,0,plane.x,plane.y,30);
+    g.addColorStop(0,'rgba(0,229,255,.15)');g.addColorStop(1,'rgba(0,229,255,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(plane.x,plane.y,30,0,Math.PI*2);ctx.fill();
+    ctx.save();ctx.translate(plane.x,plane.y);ctx.rotate(plane.angle+Math.PI/2);
+    ctx.beginPath();ctx.moveTo(0,-8);ctx.lineTo(-5,6);ctx.lineTo(0,3);ctx.lineTo(5,6);ctx.closePath();
+    ctx.fillStyle='#00E5FF';ctx.shadowColor='rgba(0,229,255,.5)';ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;ctx.restore();
+  }
+  requestAnimationFrame(draw);
+}
+resizeCanvas();
+window.addEventListener('resize',resizeCanvas);
+requestAnimationFrame(draw);
+setTimeout(updateNav,100);
+const ro=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting){en.target.classList.add('show');if(en.target.id==='p3')animateCounters()}})},{threshold:.2});
+sections.forEach(s=>ro.observe(s));
+container.addEventListener('scroll',()=>{
+  triggerAnimations();
+  if(!countersAnimated){const r=document.getElementById('p3').getBoundingClientRect();if(r.top<window.innerHeight*.75)animateCounters()}
+});
+triggerAnimations();
+console.log('✅ 智慧飞行展示平台已加载 — 共'+sections.length+'个屏幕');
+})();
+</script>
+</body>
+</html>
