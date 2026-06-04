@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>深航 A350 PBN 地面演示</title>
+<style>
+/* ================================================================
+   深航品牌设计系统
+   主色：深航红 #c41230   辅助：航空蓝 #0b2545   点缀：深金 #b8860b
+   ================================================================ */
+:root {
+  /* 背景 */
+  --bg-primary: #f5f6f8;
+  --bg-secondary: #eef0f4;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8f9fb;
+  --border: #dde0e6;
+  --border-accent: #d5ced0;
+
+  /* 文字 */
+  --text-primary: #1a1d24;
+  --text-secondary: #5c6068;
+  --text-muted: #92969e;
+
+  --sz-red: #c41230;
+  --sz-red-light: #d9364a;
+  --sz-red-dark: #9e0e26;
+  --sz-red-glow: rgba(196, 18, 48, 0.18);
+
+  --sz-blue: #0b2545;
+  --sz-blue-light: #1a4a7a;
+  --sz-blue-glow: rgba(11, 37, 69, 0.3);
+
+  --gold: #b8860b;
+  --amber: #d4a017;
+  --green: #2d8a4e;
+  --warn: #e8a317;
+
+  --radius: 6px;
+  --radius-lg: 10px;
+  --shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  --transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== 背景效果 ===== */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 65% 65% at 50% 10%, black 30%, transparent);
+}
+.bg-glow-top {
+  position: fixed; top: -15%; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 500px;
+  background: radial-gradient(ellipse at center, rgba(196, 18, 48, 0.04), transparent 70%);
+  z-index: 0; pointer-events: none;
+}
+.bg-glow-btm {
+  position: fixed; bottom: -15%; left: -10%; width: 600px; height: 400px;
+  background: radial-gradient(circle, rgba(11, 37, 69, 0.04), transparent 70%);
+  z-index: 0; pointer-events: none;
+}
+
+/* ===== 深航凤凰翼装饰 ===== */
+.phoenix-wing {
+  position: fixed; top: 8%; right: -5%; z-index: 0; pointer-events: none;
+  opacity: 0.03; width: 500px; height: 500px;
+}
+
+/* ===== 容器 ===== */
+.container {
+  position: relative; z-index: 1;
+  max-width: 1200px; margin: 0 auto; padding: 0 28px;
+}
+
+/* ===== 顶部导航 ===== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(245, 246, 248, 0.88);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(196, 18, 48, 0.12);
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 28px;
+  height: 58px; display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 15px; font-weight: 600; color: var(--text-primary);
+}
+.nav-links { display: flex; gap: 28px; list-style: none; }
+.nav-links a {
+  color: var(--text-secondary); text-decoration: none; font-size: 13px;
+  transition: color var(--transition); position: relative;
+}
+.nav-links a: hover { color: var(--sz-red-light); }
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+  background: var(--sz-red); transition: width var(--transition);
+}
+.nav-links a: hover::after { width: 100%; }
+
+/* ===== Hero 区域 ===== */
+.hero {
+  padding: 150px 0 100px; text-align: center; position: relative;
+  overflow: hidden;
+}
+
+/* Hero 粒子画布 */
+.hero-particles {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+}
+
+/* Hero 深航Logo */
+.hero-logo-mark {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  z-index: 0; pointer-events: none;
+  width: 300px; height: 300px; opacity: 0.06;
+}
+.hero-logo-mark svg {
+  width: 100%; height: 100%;
+  animation: logo-breathe 4s ease-in-out infinite;
+}
+@keyframes logo-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.06; }
+  50% { transform: scale(1.08); opacity: 0.10; }
+}
+
+/* Hero 内容 */
+.hero-inner { position: relative; z-index: 2; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 18px;
+  border: 1px solid rgba(196, 18, 48, 0.25); border-radius: 20px;
+  font-size: 11px; color: var(--sz-red);
+  letter-spacing: 3px; text-transform: uppercase;
+  margin-bottom: 24px;
+  animation: fadeInUp 0.8s ease-out both;
+}
+.hero-badge::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sz-red);
+  box-shadow: 0 0 8px var(--sz-red);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.4); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero h1 {
+  font-size: 52px; font-weight: 800; letter-spacing: -1px; line-height: 1.15;
+  background: linear-gradient(135deg, #1a1d24 0%, #3a2d30 30%, #c41230 65%, #9e0e26 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 6px;
+  animation: fadeInUp 0.8s ease-out 0.15s both;
+}
+.hero h2 {
+  font-size: 22px; font-weight: 400; color: var(--text-muted);
+  letter-spacing: 4px; margin-bottom: 40px;
+  animation: fadeInUp 0.8s ease-out 0.3s both;
+}
+.hero-meta {
+  display: flex; justify-content: center; gap: 44px; flex-wrap: wrap;
+}
+.hero-meta-item {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--text-secondary); font-size: 14px;
+}
+.hero-meta-item: nth-child(1) { animation: fadeInUp 0.8s ease-out 0.45s both; }
+.hero-meta-item: nth-child(2) { animation: fadeInUp 0.8s ease-out 0.6s both; }
+.hero-meta-item: nth-child(3) { animation: fadeInUp 0.8s ease-out 0.75s both; }
+.hero-meta-item .icon {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--bg-card); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+  transition: all 0.3s;
+}
+.hero-meta-item: hover .icon {
+  border-color: var(--sz-red);
+  box-shadow: 0 0 16px rgba(196, 18, 48, 0.12);
+  transform: scale(1.1);
+}
+
+/* ===== 分割线 ===== */
+.divider {
+  width: 80px; height: 4px;
+  background: linear-gradient(90deg, var(--sz-red), var(--sz-red-light), transparent);
+  border-radius: 2px; margin: 0 auto 40px;
+}
+
+/* ===== 章节标题 ===== */
+.section { padding: 80px 0; }
+.section-label {
+  display: inline-block;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 4px;
+  color: var(--sz-red);
+  background: rgba(196, 18, 48, 0.06);
+  padding: 4px 14px; border-radius: 3px;
+  margin-bottom: 14px;
+}
+.section-title {
+  font-size: 30px; font-weight: 700; margin-bottom: 14px;
+}
+.section-desc {
+  font-size: 15px; color: var(--text-secondary); max-width: 620px;
+  line-height: 1.8;
+}
+
+/* ===== 概览卡片 ===== */
+.overview-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px; margin-top: 40px;
+}
+.overview-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 30px 26px;
+  transition: all var(--transition); position: relative; overflow: hidden;
+}
+.overview-card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--sz-red), var(--sz-red-dark));
+  opacity: 0; transition: opacity var(--transition);
+}
+.overview-card: hover {
+  border-color: rgba(196, 18, 48, 0.25);
+  box-shadow: 0 6px 28px rgba(196, 18, 48, 0.06);
+  transform: translateY(-2px);
+}
+.overview-card: hover::after { opacity: 1; }
+.overview-card .card-icon {
+  width: 44px; height: 44px; border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 16px;
+}
+.overview-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.overview-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+/* ===== 人员区域 ===== */
+.personnel-section { margin-top: 50px; }
+.personnel-title {
+  font-size: 17px; font-weight: 600; margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(196, 18, 48, 0.2);
+  display: flex; align-items: center; gap: 10px;
+}
+.personnel-title::before {
+  content: ''; width: 4px; height: 18px; background: var(--sz-red);
+  border-radius: 2px;
+}
+.personnel-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.personnel-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 16px;
+  transition: all var(--transition);
+}
+.personnel-card: hover {
+  border-color: rgba(196, 18, 48, 0.2);
+  background: var(--bg-card-hover);
+}
+.personnel-card .name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.personnel-card .dept {
+  font-size: 12px; color: var(--text-secondary); font-weight: 500;
+}
+.personnel-card .role { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+/* ===== 航路图区域 ===== */
+.route-section {
+  margin-top: 50px; background: var(--bg-secondary);
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 44px 40px;
+}
+.route-section h3 { font-size: 20px; margin-bottom: 24px; font-weight: 600; text-align: center; }
+.route-map-img {
+  width: 100%; border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+.route-info {
+  display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+}
+.route-segment {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 24px;
+  text-align: left; flex: 1; min-width: 260px; max-width: 380px;
+}
+.route-segment .spec {
+  color: var(--sz-red-light); font-size: 13px; font-weight: 700;
+  margin-bottom: 6px;
+}
+.route-segment .path { color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.route-segment .dist { color: var(--amber); font-size: 12px; margin-top: 4px; }
+
+/* 机场卡片 */
+.airport-cards {
+  display: flex; gap: 16px; margin-top: 18px; flex-wrap: wrap;
+}
+.airport-card {
+  flex: 1; min-width: 200px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 22px;
+}
+.airport-card .icao {
+  font-family: var(--font-mono); font-size: 13px; color: var(--sz-red-light);
+  letter-spacing: 1px; margin-bottom: 4px;
+}
+.airport-card .name { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.airport-card .spec { font-size: 13px; color: var(--text-secondary); }
+
+/* ===== 场景卡片 ===== */
+.scenarios-grid { display: grid; gap: 24px; margin-top: 40px; }
+.scenario-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 34px 32px;
+  transition: all var(--transition);
+  position: relative; overflow: hidden;
+}
+.scenario-card::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+  background: linear-gradient(180deg, var(--sz-red) 0%, var(--sz-red-dark) 50%, var(--sz-blue-light) 100%);
+  border-radius: 0 2px 2px 0;
+}
+.scenario-card: hover {
+  border-color: rgba(196, 18, 48, 0.2);
+  box-shadow: 0 6px 32px rgba(196, 18, 48, 0.04);
+}
+.scenario-num {
+  font-family: var(--font-mono); font-size: 11px; color: var(--sz-red-light);
+  letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px;
+}
+.scenario-card h3 { font-size: 20px; font-weight: 600; margin-bottom: 10px; }
+.scenario-card .scenario-time {
+  font-size: 13px; color: var(--text-muted); margin-bottom: 16px;
+}
+.scenario-roles {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px;
+}
+.scenario-role-tag {
+  padding: 4px 12px; border-radius: 4px; font-size: 11px;
+  background: rgba(149, 153, 162, 0.1); color: var(--text-secondary);
+  border: 1px solid rgba(149, 153, 162, 0.2);
+}
+.scenario-points { list-style: none; }
+.scenario-points li {
+  font-size: 13.5px; color: var(--text-secondary); padding: 5px 0;
+  padding-left: 18px; position: relative; line-height: 1.65;
+}
+.scenario-points li::before {
+  content: ''; position: absolute; left: 0; top: 12px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sz-red-dark); opacity: 0.5;
+}
+
+/* 场景内图片 */
+.scenario-images {
+  margin-top: 24px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.scenario-images img {
+  width: 100%; border-radius: var(--radius);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.scenario-images img: hover {
+  border-color: var(--sz-red);
+  box-shadow: 0 4px 20px rgba(196, 18, 48, 0.1);
+}
+.scenario-images .img-caption {
+  font-size: 11px; color: var(--text-muted); margin-top: 6px;
+  text-align: center;
+}
+
+/* ===== 页脚 ===== */
+.footer {
+  text-align: center; padding: 60px 0 40px;
+  border-top: 1px solid var(--border); margin-top: 80px;
+}
+.footer-logo {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-bottom: 12px;
+}
+.footer p { font-size: 13px; color: var(--text-muted); }
+
+/* ===== 回到顶部 ===== */
+.back-to-top {
+  position: fixed; bottom: 32px; right: 32px; z-index: 100;
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-secondary); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition); font-size: 18px;
+}
+.back-to-top: hover {
+  border-color: var(--sz-red);
+  color: var(--sz-red-light);
+  box-shadow: 0 0 12px rgba(196, 18, 48, 0.15);
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+  .hero h1 { font-size: 30px; }
+  .hero h2 { font-size: 15px; letter-spacing: 2px; }
+  .hero-meta { gap: 16px; }
+  .section { padding: 50px 0; }
+  .section-title { font-size: 24px; }
+  .route-info { gap: 12px; flex-direction: column; }
+  .route-segment { max-width: none; }
+  .nav-links { display: none; }
+  .route-section { padding: 28px 20px; }
+}
+/* ===== 飞机导航栏 ===== */
+#plane-nav {
+  position: fixed;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 6px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  border: 1px solid var(--border);
+  transition: opacity 0.3s;
+}
+#plane-nav::-webkit-scrollbar { display: none; }
+
+#plane-nav .nav-item {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  font-size: 18px;
+  color: var(--text-muted);
+  text-decoration: none;
+  flex-shrink: 0;
+  opacity: 0.2;
+  transform: scale(0.75);
+}
+#plane-nav:hover .nav-item {
+  opacity: 0.6;
+  transform: scale(0.9);
+}
+#plane-nav .nav-item:hover {
+  opacity: 1 !important;
+  background: rgba(196,18,48,0.08);
+  transform: scale(1.15) !important;
+  color: var(--sz-red);
+}
+#plane-nav .nav-item.active {
+  opacity: 1 !important;
+  color: var(--sz-red);
+  background: rgba(196,18,48,0.12);
+  transform: scale(1.15) !important;
+}
+
+/* 飞机图标朝上 */
+#plane-nav .nav-item .plane-icon {
+  display: inline-block;
+  transform: rotate(-90deg);
+  transition: transform 0.3s;
+}
+#plane-nav .nav-item:hover .plane-icon {
+  transform: rotate(-90deg) scale(1.2);
+}
+#plane-nav .nav-item.active .plane-icon {
+  transform: rotate(-90deg) scale(1.3);
+}
+
+/* 提示文字 */
+#plane-nav .nav-item .nav-tip {
+  position: absolute;
+  right: 42px;
+  background: #1a1d24;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  font-family: -apple-system, 'PingFang SC', sans-serif;
+}
+#plane-nav .nav-item:hover .nav-tip {
+  opacity: 1;
+}
+
+/* 飞行轨迹线 */
+#plane-nav .nav-track {
+  width: 2px;
+  height: 20px;
+  background: var(--border);
+  border-radius: 1px;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+#plane-nav .nav-track.filled {
+  background: var(--sz-red);
+}
+#plane-nav:not(:hover) .nav-track {
+  opacity: 0.1;
+}
+</style>
+</head>
+<body>
+
+<!-- 飞机导航栏 -->
+<nav id="plane-nav">
+  <a class="nav-item" href="#speech" data-tip="领导发言"><span class="plane-icon">&#9992;</span><span class="nav-tip">领导发言</span></a>
+  <div class="nav-track"></div>
+  <a class="nav-item" href="#personnel" data-tip="参演人员"><span class="plane-icon">&#9992;</span><span class="nav-tip">参演人员</span></a>
+  <div class="nav-track"></div>
+  <a class="nav-item" href="#project-intro" data-tip="项目概览"><span class="plane-icon">&#9992;</span><span class="nav-tip">项目概览</span></a>
+  <div class="nav-track"></div>
+  <a class="nav-item" href="#scenarios" data-tip="场景演示"><span class="plane-icon">&#9992;</span><span class="nav-tip">场景演示</span></a>
+  <div class="nav-track"></div>
+  <a class="nav-item" href="#summary" data-tip="演练收尾"><span class="plane-icon">&#9992;</span><span class="nav-tip">演练收尾</span></a>
+  <div class="nav-track"></div>
+  <a class="nav-item" href="#step-end" data-tip="演练结束"><span class="plane-icon">&#9992;</span><span class="nav-tip">演练结束</span></a>
+</nav>
+
+<!-- 小飞机指示器 -->
+<div id="plane-indicator">&#9992;</div>
+
+<!-- 小飞机指示器 -->
+
+<!-- 背景效果 -->
+<div class="bg-grid"></div>
+<div class="bg-glow-top"></div>
+<div class="bg-glow-btm"></div>
+
+<!-- 深航凤凰翼装饰 -->
+<svg class="phoenix-wing" viewBox="0 0 200 200" xmlns="http: //www.w3.org/2000/svg">
+  <path d="M180,20 C160,40 130,80 110,100 C90,120 60,140 40,150 C20,160 10,170 5,180 C10,160 30,130 50,110 C70,90 100,70 130,50 C150,38 170,28 180,20 Z"
+        fill="#c41230"/>
+  <path d="M180,20 C160,50 140,90 120,115 C100,140 75,155 55,165 C40,172 25,178 15,185 C30,165 55,140 75,120 C95,100 120,80 145,60 C160,48 172,35 180,20 Z"
+        fill="#9e0e26" opacity="0.6"/>
+</svg>
+
+<!-- 导航 -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <img src="images/sz-logo.png" alt="深圳航空" style="height: 28px;width: auto;">
+      深航 A350 PBN 地面演示
+    </div>
+    <ul class="nav-links">
+      <li><a href="#speech">领导发言</a></li>
+      <li><a href="#personnel">参演人员</a></li>
+      <li><a href="#project-intro">项目概览</a></li>
+      <li><a href="#overview">演示概览</a></li>
+      <li><a href="#flight">验证航班</a></li>
+      <li><a href="#scenarios">演示场景</a></li>
+      <li><a href="#summary">总结与讲评</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <!-- 深航Logo水印 -->
+  <div class="hero-logo-mark">
+    <svg viewBox="0 0 200 200" xmlns="http: //www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#c41230" stroke-width="3"/>
+      <circle cx="100" cy="100" r="88" fill="none" stroke="#c41230" stroke-width="0.5" opacity="0.4"/>
+      <path d="M130,65 C110,85 85,105 65,125 C55,135 45,145 40,150" fill="none" stroke="#c41230" stroke-width="10" stroke-linecap="round"/>
+      <path d="M140,50 C120,75 100,100 80,130 C70,145 60,160 55,168" fill="none" stroke="#c41230" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
+      <circle cx="130" cy="50" r="8" fill="#c41230"/>
+    </svg>
+  </div>
+  <!-- 粒子画布 -->
+  <canvas class="hero-particles" id="heroCanvas"></canvas>
+
+  <div class="container hero-inner">
+    <div class="hero-badge">桌面推演</div>
+    <h1>深圳航空 A350 机型</h1>
+    <h2>PBN 运行能力地面演示</h2>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="icon">&#128197;</div>
+        <div>
+          <div style="font-weight: 600;font-size: 15px;">2026年6月10日</div>
+          <div style="font-size: 12px;color: var(--text-muted);">09:30 &#8212; 11:30</div>
+        </div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="icon">&#128205;</div>
+        <div>
+          <div style="font-weight: 600;font-size: 15px;">深航 B8 栋 309 室</div>
+          <div style="font-size: 12px;color: var(--text-muted);">桌面推演</div>
+        </div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="icon">&#9992;</div>
+        <div>
+          <div style="font-weight: 600;font-size: 15px;">ZH9001</div>
+          <div style="font-size: 12px;color: var(--text-muted);">ZGSZ &#8594; ZWWW</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 领导发言 -->
+<section class="section" id="speech">
+  <div class="container" style="max-width: 800px;">
+    <div class="divider"></div>
+    <div class="section-label">&#9670; 欢迎致辞</div>
+    <div class="section-title">领导发言</div>
+    <div style="background: var(--bg-card);border: 1px solid var(--border);border-radius: var(--radius-lg);padding: 40px;margin-top: 30px;text-align: center;">
+      <div style="font-size: 60px;margin-bottom: 20px;opacity: 0.15;">&#128172;</div>
+      <p style="font-size: 15px;color: var(--text-muted);line-height: 2;">
+        （待补充领导发言内容）
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 参演人员 -->
+<section class="section" id="personnel">
+  <div class="container">
+    <div class="divider"></div>
+    <div class="section-label">&#9670; 参演人员</div>
+    <div class="section-title">演示团队</div>
+
+    <div class="personnel-section">
+      <div class="personnel-title">局方监察员</div>
+      <div style="display: flex;gap: 12px;flex-wrap: wrap;">
+        <div class="personnel-card" style="min-width: 180px;text-align: center;padding: 26px;">
+          <div style="font-size: 42px;margin-bottom: 14px;opacity: 0.4;">&#128100;</div>
+          <div class="name">待确认</div>
+          <div class="dept">局方</div>
+        </div>
+        <div class="personnel-card" style="min-width: 180px;text-align: center;padding: 26px;">
+          <div style="font-size: 42px;margin-bottom: 14px;opacity: 0.4;">&#128100;</div>
+          <div class="name">待确认</div>
+          <div class="dept">局方</div>
+        </div>
+        <div class="personnel-card" style="min-width: 180px;text-align: center;padding: 26px;">
+          <div style="font-size: 42px;margin-bottom: 14px;opacity: 0.4;">&#128100;</div>
+          <div class="name">待确认</div>
+          <div class="dept">局方</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="personnel-section">
+      <div class="personnel-title">深圳航空 &#8212; 内部演练团队（7人）</div>
+      <div class="personnel-grid">
+        <div class="personnel-card">
+          <div class="name">陈孝臣</div>
+          <div class="dept">飞行部</div>
+          <div class="role">A350 机长（PF）</div>
+        </div>
+        <div class="personnel-card">
+          <div class="name">刘博</div>
+          <div class="dept">飞行部</div>
+          <div class="role">A350 机长（PM）</div>
+        </div>
+        <div class="personnel-card">
+          <div class="name">谌中银</div>
+          <div class="dept">运行管理部</div>
+          <div class="role">签派工程师</div>
+        </div>
+        <div class="personnel-card">
+          <div class="name">肖伟业</div>
+          <div class="dept">运行管理部</div>
+          <div class="role">情报工程师</div>
+        </div>
+        <div class="personnel-card">
+          <div class="name">王国庆</div>
+          <div class="dept">维修工程部</div>
+          <div class="role">维修放行工程师</div>
+        </div>
+        <div class="personnel-card">
+          <div class="name">章琳</div>
+          <div class="dept">标准管理部</div>
+          <div class="role">记录人</div>
+        </div>
+        <div class="personnel-card">
+          <div class="name">许超</div>
+          <div class="dept">标准管理部</div>
+          <div class="role">主持人 &#183; 飞行运行标准工程师</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 项目概览 -->
+<section class="section" id="project-intro">
+  <div class="container" style="max-width: 900px;">
+    <div class="divider"></div>
+    <div class="section-label">&#9670; 项目概览</div>
+    <div class="section-title">关于本次演示</div>
+    <div style="background: var(--bg-card);border: 1px solid var(--border);border-radius: var(--radius-lg);padding: 36px 40px;margin-top: 30px;">
+      <p style="font-size: 15px;color: var(--text-secondary);line-height: 2.2;text-indent: 2em;">
+        根据局方对航空公司PBN运行能力验证的要求，深圳航空拟于2026年6月10日开展A350机型PBN运行能力桌面推演。本次演示以验证航班ZH9001（深圳宝安&#8594;乌鲁木齐地窝堡）为背景，模拟从飞行前准备到进近着陆的完整运行链条，覆盖导航数据库管理、正常放行、FMS选择器故障、双GPS干扰丢失信号、RNP APCH进近阶段单套FMC失效等五个典型场景。
+      </p>
+      <p style="font-size: 15px;color: var(--text-secondary);line-height: 2.2;text-indent: 2em;margin-top: 16px;">
+        参演人员涵盖飞行、签派、情报、维修、标准管理等核心岗位共7人，由标准管理部飞行运行标准工程师许超主持。通过本次桌面推演，旨在系统验证深航飞行员、签派员和维修人员对A350机型PBN运行的应急处置能力，展现公司在导航数据库管理、RAIM预测分析、MEL保留处置、空中故障协同等方面的规章符合性和运行规范性。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 演示概览 -->
+<section class="section" id="overview">
+  <div class="container">
+    <div class="divider"></div>
+    <div class="section-label">&#9670; 演示概览</div>
+    <div class="section-title">验证目的与范围</div>
+    <p style="font-size: 18px; color: var(--text-secondary); white-space: nowrap; text-align: center;">
+      验证深航飞行员、签派员和维修人员对 A350 机型 PBN 运行的处置情况，是否满足规章和运行要求。
+    </p>
+
+    <div class="overview-grid">
+      <div class="overview-card">
+        <div class="card-icon" style="background: rgba(196,18,48,0.08);color: var(--sz-red-light);">&#9733;</div>
+        <h3>A350 PBN 资质</h3>
+        <p>RNAV-1, RNAV-2, RNAV-5, RNAV-10(RNP-10), RNP-1, RNP-4, RNP APCH</p>
+      </div>
+      <div class="overview-card">
+        <div class="card-icon" style="background: rgba(184,134,11,0.08);color: var(--gold);">&#9881;</div>
+        <h3>演示类型</h3>
+        <p>桌面推演 &#8212; 模拟完整航班 ZH9001 运行全流程</p>
+      </div>
+      <div class="overview-card">
+        <div class="card-icon" style="background: rgba(45,138,78,0.08);color: var(--green);">&#9776;</div>
+        <h3>场景数量</h3>
+        <p>5 个科目，覆盖导航数据库管理、正常放行、故障处置全链条</p>
+      </div>
+      <div class="overview-card">
+        <div class="card-icon" style="background: rgba(232,163,23,0.08);color: var(--warn);">&#9888;</div>
+        <h3>异常场景</h3>
+        <p>FMS 选择器故障 / 双 GPS 干扰失效 / 单套 FMC 失效</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 验证航班 -->
+<section class="section" id="flight">
+  <div class="container">
+    <div class="divider"></div>
+    <div class="section-label">&#9670; 验证航班</div>
+    <div class="section-title">ZH9001 航路信息</div>
+
+    <div class="route-section">
+      <h3>&#128752; 航路示意图 ZGSZ &#8594; ZWWW</h3>
+      <img src="images/image7.png" alt="航路图 - ZGSZ至ZWWW完整航路" class="route-map-img" onclick="window.open(this.src)">
+
+      <div class="route-info">
+        <div class="route-segment">
+          <div class="spec">RNAV 2 &#8212; 1258 NM</div>
+          <div class="path">MIPAG W21 TEPID W24 OSNOV G586 QP B330 ELKAL W179 OMBON W195 IDOPA W197 ANDIM B215 LAXEV</div>
+          <div class="dist">21 个航路点</div>
+        </div>
+        <div class="route-segment">
+          <div class="spec">RNP 4 &#8212; 270 NM</div>
+          <div class="path">LAXEV B215 TODOD</div>
+          <div class="dist">纯 RNAV 空域 &#183; 需传统导航备份方案</div>
+        </div>
+        <div class="route-segment">
+          <div class="spec">RNAV 2 &#8212; 449 NM</div>
+          <div class="path">TODOD B215 IBANO G470 QTV W99 AGOXA</div>
+          <div class="dist">终端进场区域</div>
+        </div>
+      </div>
+
+      <!-- 航路详细表格图 -->
+      <div class="scenario-images" style="margin-top: 32px;">
+        <div>
+          <img src="images/image6.png" alt="公司航路详细表格" onclick="window.open(this.src)">
+          <div class="img-caption">公司航路 ZGSZZWWW1 详细航路点清单</div>
+        </div>
+        <div>
+          <img src="images/image8.png" alt="航路中段" onclick="window.open(this.src)">
+          <div class="img-caption">航路中段详细航迹图</div>
+        </div>
+        <div>
+          <img src="images/image9.png" alt="RNP4航段" onclick="window.open(this.src)">
+          <div class="img-caption">RNP 4 航段 LAXEV-TODOD 特写</div>
+        </div>
+        <div>
+          <img src="images/image11.png" alt="终端区航图" onclick="window.open(this.src)">
+          <div class="img-caption">终端区进场航迹图</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="airport-cards">
+      <div class="airport-card">
+        <div class="icao">ZGSZ</div>
+        <div class="name">深圳宝安国际机场</div>
+        <div class="spec">起飞机场 &#183; RNP 1 &#183; RNP APCH</div>
+      </div>
+      <div class="airport-card">
+        <div class="icao">ZWWW</div>
+        <div class="name">乌鲁木齐地窝堡国际机场</div>
+        <div class="spec">目的地机场 &#183; RNP 1 &#183; RNP APCH &#183; ILS 不工作</div>
+      </div>
+      <div class="airport-card">
+        <div class="icao">ZWTL</div>
+        <div class="name">吐鲁番交河机场</div>
+        <div class="spec">备降机场 &#183; VOR 程序可用 &#183; ILS 不可用</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 演示场景 -->
+<section class="section" id="scenarios">
+  <div class="container">
+    <div class="divider"></div>
+    <div class="section-label">&#9670; 演示场景</div>
+    <div class="section-title">五大科目推演</div>
+    <p class="section-desc">按 ZH9001 航班运行时间线展开，覆盖飞行前准备至进近着陆全阶段</p>
+
+    <div class="scenarios-grid">
+
+      <!-- 场景一 -->
+      <div class="scenario-card" id="scene-1">
+        <div class="scenario-num">场景一</div>
+        <h3>导航数据库管理</h3>
+        <div class="scenario-time">&#9202; 计划 13 分钟 &nbsp;|&nbsp; 责任人：肖伟业</div>
+        <div class="scenario-roles">
+          <span class="scenario-role-tag">情报工程师</span>
+        </div>
+        <ul class="scenario-points">
+          <li>导航数据库来源合法性验证 &#8212; Honeywell（LOA Type II）、Jeppesen（LOA Type I）</li>
+          <li>数据周期管理全流程展示 &#8212; 识别号 ZH52605001 / 2605 期（有效期至 2026.06.11）</li>
+          <li>关键航路点、进近程序数据校核 + 航科院三方比对</li>
+          <li>机载设备兼容性验证（FMS 软硬件版本确认）</li>
+          <li>应急程序 &#8212; 公司通告发布（例：喀什 ZWSH 08 号 RNP 进近程序错误告警）</li>
+        </ul>
+
+        <div class="scenario-images">
+          <div>
+            <img src="images/image5.png" alt="导航数据库校验报告" onclick="window.open(this.src)">
+            <div class="img-caption">深圳航空导航数据库校验报告封面</div>
+          </div>
+          <div>
+            <img src="images/image1.png" alt="Honeywell数据供应商" onclick="window.open(this.src)">
+            <div class="img-caption">Honeywell 数据供应商 LOA 认证</div>
+          </div>
+          <div>
+            <img src="images/image2.png" alt="数据库信息" onclick="window.open(this.src)">
+            <div class="img-caption">数据库 ZH5-2605-001 信息</div>
+          </div>
+          <div>
+            <img src="images/image3.png" alt="USB加载成功" onclick="window.open(this.src)">
+            <div class="img-caption">导航数据 USB 加载成功确认</div>
+          </div>
+          <div>
+            <img src="images/image4.png" alt="数据校核记录表" onclick="window.open(this.src)">
+            <div class="img-caption">电子导航数据库客户化数据校核记录表</div>
+          </div>
+          <div>
+            <img src="images/image13.png" alt="数据保障报告" onclick="window.open(this.src)">
+            <div class="img-caption">电子导航数据库保障报告</div>
+          </div>
+          <div>
+            <img src="images/image12.png" alt="Honeywell服务申请" onclick="window.open(this.src)">
+            <div class="img-caption">Honeywell Services Request - A350-941</div>
+          </div>
+          <div>
+            <img src="images/image14.png" alt="校核记录表（Excel）" onclick="window.open(this.src)">
+            <div class="img-caption">电子导航数据库客户化数据校核记录（Excel）</div>
+          </div>
+          <div>
+            <img src="images/scene1-navdb.png" alt="导航数据库校验详情" onclick="window.open(this.src)">
+            <div class="img-caption">导航数据库校验 &#8212; 关键航路点、进近程序数据校核</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景二 -->
+      <div class="scenario-card" id="scene-2">
+        <div class="scenario-num">场景二</div>
+        <h3>正常放行</h3>
+        <div class="scenario-time">&#9202; 计划 14 分钟 &nbsp;|&nbsp; 07:10 签派评估放行 &middot; 维修 + 签派 + 飞行协同</div>
+        <div class="scenario-roles">
+          <span class="scenario-role-tag">谌中银 &#183; 签派评估</span>
+          <span class="scenario-role-tag">王国庆 &#183; 维修放行</span>
+          <span class="scenario-role-tag">陈孝臣 &#183; PF</span>
+          <span class="scenario-role-tag">刘博 &#183; PM</span>
+        </div>
+
+        <!-- 签派 + 飞行员左右对照 -->
+        <div style="display: grid;grid-template-columns: 1fr 1fr;gap: 24px;margin: 20px 0;">
+          <!-- 左：签派处置要点 -->
+          <div>
+            <div style="font-size: 13px;font-weight: 700;color: var(--sz-red);margin-bottom: 14px;padding-bottom: 8px;border-bottom: 2px solid var(--sz-red);letter-spacing: 2px;">&#9998; 签派处置要点</div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">RAIM 预测分析</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div><b>ZWWW RNP 0.3</b> &mdash; 16:21-16:30 不可用</div>
+                <div>RWY08 方向该时段内无可用程序，需在 16:30 后建立最后进近</div>
+                <div>按最后进近 5 分钟推算：落地时间需在 16:35 之后</div>
+                <div>&rArr; 航班需在 <b style="color: var(--sz-red);">10:50 后起飞</b></div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">航路 RAIM 评估</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div><b>AKNAV-PASLU 段 RNP 2.0</b> &mdash; 12:00-12:12 不可用</div>
+                <div>航班晚 10 分钟起飞可能涉及，需找情报确认沿途导航台覆盖，向管制确认导航方案</div>
+                <div style="margin-top: 8px;"><b>LAXEV-TODOD 段 RNP 4</b> &mdash; RAIM 预测可用（航科院 FDE 打开结果）</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">机场设施 &amp; 备降场评估</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div><b>ZWWW</b> &mdash; RWY08L/08R ILS 关闭，预计使用 08 号 RNP APCH</div>
+                <div><b>ZWTL</b> &mdash; RWY09 ILS 关闭，盲降不可用</div>
+                <div>目的地和备降场不可同时使用 RNP APCH</div>
+                <div>&rArr; ZWTL 使用 VOR 标准，备降标准：<b>164/3500</b></div>
+                <div style="margin-top: 8px;padding-top: 8px;border-top: 1px dashed var(--border);"><b>ZWSH</b> 天气和机场设施良好，选择作为备降场</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">气象信息</div>
+              <div style="font-size: 11px;color: var(--text-muted);line-height: 1.8;background: var(--bg-secondary);border-radius: 8px;padding: 10px 14px;font-family: 'SF Mono',monospace;">
+                METAR ZWWW 092300Z 08005MPS CAVOK 31/M04 Q1014 NOSIG<br>
+                TAF ZWWW 092104Z 1000/1106 08006MPS CAVOK<br>
+                METAR ZWTL 092300Z VRB03MPS CAVOK 33/M09 Q1013<br>
+                TAF ZWSH 092110Z 1000/1106 06003MPS 6000 FEW040
+              </div>
+            </div>
+          </div>
+
+          <!-- 右：飞行机组处置要点 -->
+          <div>
+            <div style="font-size: 13px;font-weight: 700;color: var(--sz-red);margin-bottom: 14px;padding-bottom: 8px;border-bottom: 2px solid var(--sz-red);letter-spacing: 2px;">&#9992; 飞行机组处置要点</div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">接收放行资料</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>核对放行资料和航路</div>
+                <div>通过构型汇总确认飞机满足 RNP APCH 运行要求</div>
+                <div>OIS 准备阶段确认飞机无故障</div>
+                <div>如故障查询 MEL 确认是否影响 PBN 运行</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">离场前要求</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>&#10003; <b>必须的设备</b> &mdash; 证实</div>
+                <div style="margin-left: 14px;font-size: 11px;color: var(--text-muted);">1 部 FMS、1 部 GPS / 2 部 DME、2 部 IRS、1 部 NAV 方式 FD</div>
+                <div>&#10003; <b>机场温度</b> &mdash; 在限制内</div>
+                <div>&#10003; <b>NAV PRIMARY 能力</b> &mdash; 证实</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">离场前程序</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>&#8226; NAVAID 抑制 &mdash; 按需</div>
+                <div>&#8226; 离场进近程序 &mdash; 选择</div>
+                <div>&#8226; RNP 值 &mdash; 检查设置</div>
+                <div>&#8226; 一发失效离场程序 &mdash; SEC FPLN 中输入（如适用）</div>
+                <div>&#8226; NAV PRIMARY &mdash; 证实</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">显示设置 &middot; DISPLAYS</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>&#8226; TAWS 各模式 &mdash; 检查接通</div>
+                <div>&#8226; ND 方式 &mdash; ARC</div>
+                <div>&#8226; 距离圈 &mdash; 按需</div>
+                <div>&#8226; NAV &mdash; 预位</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">离场简令</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div><b>PF</b> &mdash; 完成正常简令外，简述离场程序（含速度/高度限制）、一发失效程序</div>
+                <div><b>PM</b> &mdash; 证实 FPLN 与简述一致</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">最大偏差 &middot; 一发失效</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div><b>水平偏差</b></div>
+                <div style="margin-left: 10px;">&bull; 1/2 RNP 值 &mdash; 提醒</div>
+                <div style="margin-left: 10px;">&bull; 1 倍 RNP 值 &mdash; 断开 AP 修正偏差</div>
+                <div style="margin-top: 6px;"><b>一发失效程序</b></div>
+                <div style="margin-left: 10px;">&bull; 油门 &mdash; TOGA</div>
+                <div style="margin-left: 10px;">&bull; NAV &mdash; 立刻选择</div>
+                <div style="margin-left: 10px;">&bull; 遵守速度和高度限制</div>
+                <div style="margin-left: 10px;">&bull; 决策点之前生效 SEC FPLN</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景三 -->
+      <div class="scenario-card" id="scene-3">
+        <div class="scenario-num">场景三</div>
+        <h3>FMS 选择器故障</h3>
+        <div class="scenario-time">&#9202; 计划 25 分钟 &nbsp;|&nbsp; 08:30 &middot; 放行后、起飞前出现故障</div>
+        <div class="scenario-roles">
+          <span class="scenario-role-tag">王国庆 &#183; 维修排故</span>
+          <span class="scenario-role-tag">谌中银 &#183; 签派评估</span>
+          <span class="scenario-role-tag">陈孝臣 &#183; PF</span>
+          <span class="scenario-role-tag">刘博 &#183; PM</span>
+        </div>
+
+        <!-- 故障通报 -->
+        <div style="background: rgba(196,18,48,0.04);border-left: 3px solid var(--sz-red);border-radius: 6px;padding: 12px 16px;margin-bottom: 20px;font-size: 13px;color: var(--text-secondary);line-height: 1.8;">
+          <b style="color: var(--sz-red);">08:30</b> &mdash; 维修工程部 MCC 反馈：飞机参考 <b>MEL 22-70-02A</b> 保留 FMS 选择器，失效在 <b>BOTH ON 1</b> 位置。
+        </div>
+
+        <!-- 签派 + 飞行员左右对照 -->
+        <div style="display: grid;grid-template-columns: 1fr 1fr;gap: 24px;margin: 20px 0;">
+          <!-- 左：签派处置要点 -->
+          <div>
+            <div style="font-size: 13px;font-weight: 700;color: var(--sz-red);margin-bottom: 14px;padding-bottom: 8px;border-bottom: 2px solid var(--sz-red);letter-spacing: 2px;">&#9998; 签派处置要点</div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">MEL 运行限制</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>当 FMS 选择器在 BOTH ON 1 位不工作（O 项）：</div>
+                <div style="margin-top: 6px;">&#10007; 不允许运行 <b>RNAV 10、RNP 4、RNP 2</b></div>
+                <div>&#10007; 不允许要求两部 RNAV 系统的 <b>RNAV 1、RNAV 2</b> 终端程序</div>
+                <div>&#10007; 不允许 <b>RNP AR</b> 运行</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">航段影响评估</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div><b>LAXEV &rarr; TODOD（RNP 4）</b> 受影响</div>
+                <div>&#9654; 找情报确认沿途导航台覆盖</div>
+                <div>&#9654; 向管制确认导航方案</div>
+                <div style="margin-top: 4px;color: var(--sz-red);">情报确认：沿途 VOR 覆盖满足要求</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">不受影响程序</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>&#10003; <b>ZGSZ 离场</b> &mdash; RNP 1，ILS 可用</div>
+                <div>&#10003; <b>ZWWW 进场</b> &mdash; RNP 1，ILS 可用</div>
+                <div>&#10003; <b>ZWTL 进近</b> &mdash; RNP APCH，不受影响</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">放行修订</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                修改 FPL，删除 18 项 PBN 中 <b>A1 / L1 / T1</b>，发布修订放行单
+              </div>
+            </div>
+          </div>
+
+          <!-- 右：飞行员处置要点 -->
+          <div>
+            <div style="font-size: 13px;font-weight: 700;color: var(--sz-red);margin-bottom: 14px;padding-bottom: 8px;border-bottom: 2px solid var(--sz-red);letter-spacing: 2px;">&#9992; 飞行机组处置要点</div>
+
+            <div style="font-size: 12px;color: var(--text-secondary);line-height: 2;background: var(--bg-secondary);border-radius: 8px;padding: 16px;">
+              <div>按照程序处置：</div>
+              <div>&#8226; 查询 MEL 手册，确认限制条件</div>
+              <div>&#8226; 评估是否影响 PBN 运行</div>
+              <div>&#8226; 不影响 PBN 运行 &mdash; 正常执行航班</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 维修处置要点（全宽） -->
+        <div style="margin-top: 4px;">
+          <div style="font-size: 13px;font-weight: 700;color: var(--sz-red);margin-bottom: 14px;padding-bottom: 8px;border-bottom: 2px solid var(--sz-red);letter-spacing: 2px;">&#9881; 维修处置要点</div>
+          <div style="display: grid;grid-template-columns: 1fr 1fr;gap: 16px;">
+            <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 14px 16px;">
+              <div style="font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">保留路径</div>
+              <div>&#8226; 执行 FMC 系统测试，确定 FMS 选择器故障</div>
+              <div>&#8226; 查询 MEL 22-70-02A：可保留 FMS 选择器</div>
+              <div>&#8226; 条件：所有 FMC 工作正常</div>
+              <div>&#8226; 无 M 项，有 O 项</div>
+              <div>&#8226; 通知签派与飞行评估保留影响</div>
+            </div>
+            <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 14px 16px;">
+              <div style="font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">无法保留时</div>
+              <div>&#8226; 领取航材更换 FMS 选择器 4CC</div>
+              <div>&#8226; 更换后再次执行 FMC 系统测试</div>
+              <div>&#8226; 测试正常后 &mdash; 放行飞机</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario-images" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));margin-top: 20px;">
+          <div>
+            <img src="images/image15.png" alt="MEL 22-70-02" onclick="window.open(this.src)">
+            <div class="img-caption">MEL 22-70-02 FMS 选择器 - 修复期限与放行要求</div>
+          </div>
+          <div>
+            <img src="images/image16.png" alt="MEL 22-70-02A 限制" onclick="window.open(this.src)">
+            <div class="img-caption">MEL 22-70-02A &#8212; FMS 选择器失效运行限制</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景四 -->
+      <div class="scenario-card" id="scene-4">
+        <div class="scenario-num">场景四</div>
+        <h3>起飞后双 GPS 干扰失去信号</h3>
+        <div class="scenario-time">&#9202; 计划 22 分钟 &nbsp;|&nbsp; 09:30 撤保留 &middot; 11:00 起飞 &middot; 12:10 GPS PRIMARY LOST</div>
+        <div class="scenario-roles">
+          <span class="scenario-role-tag">陈孝臣 &#183; PF</span>
+          <span class="scenario-role-tag">刘博 &#183; PM</span>
+          <span class="scenario-role-tag">谌中银 &#183; AOC 会商</span>
+          <span class="scenario-role-tag">王国庆 &#183; 维修监控</span>
+        </div>
+
+        <!-- 时间线 -->
+        <div style="display: flex;gap: 16px;margin-bottom: 20px;flex-wrap: wrap;">
+          <div style="flex: 1;min-width: 160px;background: var(--bg-secondary);border-radius: 8px;padding: 14px;text-align: center;">
+            <div style="font-size: 11px;color: var(--text-muted);margin-bottom: 4px;">故障排除</div>
+            <div style="font-size: 18px;font-weight: 700;color: var(--text-primary);">09:30</div>
+            <div style="font-size: 11px;color: var(--text-muted);margin-top: 2px;">撤销 MEL 保留</div>
+          </div>
+          <div style="color: var(--text-muted);display: flex;align-items: center;font-size: 20px;">&rarr;</div>
+          <div style="flex: 1;min-width: 160px;background: var(--bg-secondary);border-radius: 8px;padding: 14px;text-align: center;">
+            <div style="font-size: 11px;color: var(--text-muted);margin-bottom: 4px;">航班起飞</div>
+            <div style="font-size: 18px;font-weight: 700;color: var(--text-primary);">11:00</div>
+            <div style="font-size: 11px;color: var(--text-muted);margin-top: 2px;">正常离场</div>
+          </div>
+          <div style="color: var(--text-muted);display: flex;align-items: center;font-size: 20px;">&rarr;</div>
+          <div style="flex: 1;min-width: 160px;background: rgba(196,18,48,0.06);border: 1px solid rgba(196,18,48,0.2);border-radius: 8px;padding: 14px;text-align: center;">
+            <div style="font-size: 11px;color: var(--sz-red);margin-bottom: 4px;">故障触发</div>
+            <div style="font-size: 18px;font-weight: 700;color: var(--sz-red);">12:10</div>
+            <div style="font-size: 11px;color: var(--sz-red);margin-top: 2px;">GPS PRIMARY LOST</div>
+          </div>
+        </div>
+
+        <!-- 签派 + 飞行员左右对照 -->
+        <div style="display: grid;grid-template-columns: 1fr 1fr;gap: 24px;margin: 20px 0;">
+          <!-- 左：签派处置要点 -->
+          <div>
+            <div style="font-size: 13px;font-weight: 700;color: var(--sz-red);margin-bottom: 14px;padding-bottom: 8px;border-bottom: 2px solid var(--sz-red);letter-spacing: 2px;">&#9998; 签派处置要点（AOC 会商）</div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">1. 位置监控切换</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                ADS-B 失去位置信号 &rarr; 使用 <b>ACARS 位置监控</b><br>
+                通知机组：存在异常情况时及时通报 AOC
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">2. RNP 4 航段运行方案（LAXEV &rarr; TODOD）</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div style="margin-bottom: 4px;">GPS 信号失去后无法执行 RNP 4，需确认方案：</div>
+                <div style="margin-left: 4px;padding: 4px 0;">&#9312; 确认 B215 传统导航台覆盖 &mdash; 联系情报</div>
+                <div style="margin-left: 4px;padding: 4px 0;">&#9313; 联系空管 &mdash; 确认雷达监视引导 + 拉大间隔</div>
+                <div style="margin-left: 4px;padding: 4px 0;">&#9314; 若以上均不可行 &rarr; 制定空中改航方案，确认油量 &rarr; 通知空管</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">3. 备降决策</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>提前确认备降方案 &rarr; 得出决策点</div>
+                <div>到达决策点前故障未恢复 + 无改航方案 &rarr; <b style="color: var(--sz-red);">不能继续向前</b></div>
+                <div>无法制定改航方案 &rarr; 备降</div>
+                <div style="margin-top: 6px;padding-top: 6px;border-top: 1px dashed var(--border);">
+                  本航班方案：LAXEV 之前不满足要求 &rarr; 返航 <b>兰州 ZLLL</b><br>
+                  （计算着陆重量、兰州着陆距离）
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">4. 终端区能力</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                &#10003; ZWWW 具备传统进场 + ILS<br>
+                &#10003; ZWTL 可用 VOR 程序
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">5. 乌鲁木齐进近通报</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                乌鲁木齐进近涉及 <b>ADS-B 管制</b>，需通知管制
+              </div>
+            </div>
+          </div>
+
+          <!-- 右：飞行员处置要点 -->
+          <div>
+            <div style="font-size: 13px;font-weight: 700;color: var(--sz-red);margin-bottom: 14px;padding-bottom: 8px;border-bottom: 2px solid var(--sz-red);letter-spacing: 2px;">&#9992; 飞行机组处置要点</div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">1. ECAM 程序处置</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>&#8226; 按照 ECAM 程序处置</div>
+                <div>&#8226; 监控导航精度</div>
+                <div>&#8226; 通报 ATC</div>
+                <div>&#8226; 寻求雷达监控</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">2. GNSS 干扰程序</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                参考 FCOM 补充程序 &mdash; GNSS 干扰程序
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">3. 复位程序</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                脱离干扰区域后，按需执行相关复位程序
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景五 -->
+      <div class="scenario-card" id="scene-5">
+        <div class="scenario-num">场景五</div>
+        <h3>RNP APCH 进近 &#8212; 单套 FMC 失效</h3>
+        <div class="scenario-time">&#9202; 计划 32 分钟 &nbsp;|&nbsp; 13:00 GPS 恢复 &middot; RWY 08L RNP APCH &middot; FMC 2 故障</div>
+        <div class="scenario-roles">
+          <span class="scenario-role-tag">陈孝臣 &#183; PF</span>
+          <span class="scenario-role-tag">刘博 &#183; PM</span>
+          <span class="scenario-role-tag">谌中银 &#183; 签派支持</span>
+          <span class="scenario-role-tag">王国庆 &#183; 维修监控</span>
+        </div>
+
+        <!-- 进度条 -->
+        <div style="display: flex;gap: 8px;margin-bottom: 20px;flex-wrap: wrap;">
+          <div style="flex: 1;min-width: 100px;background: rgba(59,130,246,0.08);border-radius: 8px;padding: 10px;text-align: center;">
+            <div style="font-size: 11px;color: var(--text-muted);">GPS 恢复</div>
+            <div style="font-size: 15px;font-weight: 700;color: #3b82f6;">13:00</div>
+          </div>
+          <div style="color: var(--text-muted);display: flex;align-items: center;">&rarr;</div>
+          <div style="flex: 1;min-width: 100px;background: var(--bg-secondary);border-radius: 8px;padding: 10px;text-align: center;">
+            <div style="font-size: 11px;color: var(--text-muted);">进近准备</div>
+            <div style="font-size: 15px;font-weight: 700;color: var(--text-primary);">设备检查</div>
+          </div>
+          <div style="color: var(--text-muted);display: flex;align-items: center;">&rarr;</div>
+          <div style="flex: 1;min-width: 100px;background: var(--bg-secondary);border-radius: 8px;padding: 10px;text-align: center;">
+            <div style="font-size: 11px;color: var(--text-muted);">FAF 点前</div>
+            <div style="font-size: 15px;font-weight: 700;color: var(--text-primary);">APP 预位</div>
+          </div>
+          <div style="color: var(--text-muted);display: flex;align-items: center;">&rarr;</div>
+          <div style="flex: 1;min-width: 100px;background: var(--bg-secondary);border-radius: 8px;padding: 10px;text-align: center;">
+            <div style="font-size: 11px;color: var(--text-muted);">FAF 点</div>
+            <div style="font-size: 15px;font-weight: 700;color: var(--text-primary);">F-GS 生效</div>
+          </div>
+          <div style="color: var(--text-muted);display: flex;align-items: center;">&rarr;</div>
+          <div style="flex: 1;min-width: 100px;background: rgba(196,18,48,0.06);border: 1px solid rgba(196,18,48,0.15);border-radius: 8px;padding: 10px;text-align: center;">
+            <div style="font-size: 11px;color: var(--sz-red);">FMC 2 故障</div>
+            <div style="font-size: 15px;font-weight: 700;color: var(--sz-red);">降级处置</div>
+          </div>
+        </div>
+
+        <!-- 左：进近准备与执行 ｜ 右：降级管理与复飞 -->
+        <div style="display: grid;grid-template-columns: 1fr 1fr;gap: 24px;margin: 20px 0;">
+          <!-- 左：进近准备与执行 -->
+          <div>
+            <div style="font-size: 13px;font-weight: 700;color: #3b82f6;margin-bottom: 14px;padding-bottom: 8px;border-bottom: 2px solid #3b82f6;letter-spacing: 2px;">&#9992; 进近准备与执行</div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">进近前的要求</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>&#10003; <b>必须的设备</b> &mdash; 证实</div>
+                <div style="margin-left: 14px;font-size: 11px;color: var(--text-muted);">1 部 FMS、1 部 GPS、1 部 IRS、1 部 NAV 方式 FD</div>
+                <div>&#10003; <b>机场温度</b> &mdash; 在限制内</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">进近前程序</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div style="font-weight: 600;margin-bottom: 2px;">MFD</div>
+                <div>&#8226; NAVAID 抑制 &mdash; 按需</div>
+                <div>&#8226; RNP APCH 进近程序 &mdash; 选择</div>
+                <div>&#8226; 决断高度（高）输入 &mdash;（低温修正）按需</div>
+                <div>&#8226; RNP 值 &mdash; 检查</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">DISPLAYS</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>&#8226; TAWS 各模式 &mdash; 检查接通</div>
+                <div>&#8226; ND 方式 &mdash; ARC</div>
+                <div>&#8226; NAV &mdash; 生效</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">进近简令</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div><b>PF</b> &mdash; 正常简令外，简述 RNP 进近程序（速度/高度限制）、复飞程序、一发失效程序</div>
+                <div style="margin-top: 4px;">&#8226; 检查 FMS 数据库的进近编码</div>
+                <div>&#8226; 进近能力降级的战略</div>
+                <div>&#8226; 低于最低标准的飞行技术（如：断开 AP 时机、FD OFF / BIRD ON 时机）</div>
+                <div style="margin-top: 4px;"><b>PM</b> &mdash; 证实 FPLN 与简述一致</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">FAF 点以前</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>&#8226; <b>NAV PRIMARY</b> &mdash; 检查</div>
+                <div>&#8226; <b>高度表</b> &mdash; 交叉检查误差 &lt; 100 英尺</div>
+                <div>&#8226; <b>APPR 按钮</b> &mdash; 按压</div>
+                <div>&#8226; <b>APP</b> &mdash; 检查显示</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">在 FAF 点</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>&#8226; LOC/F-GS（或 NAV/FPA 仅 LNAV）&mdash; <b>生效</b></div>
+                <div>&#8226; 复飞高度 &mdash; 在 F-GS<sup>*</sup> 后设置</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右：降级管理与复飞 -->
+          <div>
+            <div style="font-size: 13px;font-weight: 700;color: var(--sz-red);margin-bottom: 14px;padding-bottom: 8px;border-bottom: 2px solid var(--sz-red);letter-spacing: 2px;">&#9888; 降级管理与复飞程序</div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">仅 LNAV 降级 &#8212; 立即复飞</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>&#8226; 两部 ND 上 <b style="color: var(--sz-red);">NAV PRIMARY LOST</b></div>
+                <div>&#8226; XTK &gt; 0.3 NM</div>
+                <div>&#8226; ECAM 上 NAV GNSS/ACFT POS DISAGREE</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">LNAV/VNAV 降级 &#8212; 立即复飞</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>&#8226; 失去 F-APP 能力</div>
+                <div>&#8226; F-LOC 偏离超过一个点</div>
+                <div>&#8226; F-GS 超过 / 低于 1/2 点</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">复飞程序</div>
+              <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;">
+                <div>&#8226; 油门 &mdash; TOGA / TOGA SOFT</div>
+                <div>&#8226; NAV &mdash; 检查</div>
+                <div>&#8226; 遵守复飞程序的速度和高度限制</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px;font-weight: 600;color: var(--text-primary);margin-bottom: 6px;">FAF 前 / 后差异化策略</div>
+              <div style="background: rgba(196,18,48,0.04);border-radius: 8px;padding: 12px 14px;">
+                <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;margin-bottom: 10px;">
+                  <b>FAF 点以前失去 RNP 能力：</b><br>
+                  &#8226; 按照 ECAM 或检查单程序执行<br>
+                  &#8226; 可转为传统仪表飞行<br>
+                  &#8226; 或保持目视（目视飞行气象条件）<br>
+                  &#8226; 或要求雷达引导中止进近
+                </div>
+                <div style="font-size: 12px;color: var(--sz-red);line-height: 1.9;padding-top: 10px;border-top: 1px dashed var(--border);">
+                  <b>FAF 点以后系统失效（仪表飞行气象条件）：</b><br>
+                  &#9654; <b>复飞</b>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size: 12px;color: var(--text-secondary);line-height: 1.9;background: var(--bg-secondary);border-radius: 8px;padding: 12px 14px;margin-top: 16px;">
+              <div style="font-weight: 600;color: var(--text-primary);margin-bottom: 4px;">处置总则</div>
+              RNP 按进近准备程序查询进入前所需设备，确保满足执行 RNP APCH 进近设备要求；进入进近阶段后，按降级后的处置程序处置。
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 演练小结与讲评 -->
+<section class="section" id="summary">
+  <div class="container" style="max-width: 900px;">
+    <div class="divider"></div>
+    <div class="section-label">&#9670; 总结与讲评</div>
+    <div class="section-title">演练收尾</div>
+
+    <!-- 演练小结 -->
+    <div style="background: var(--bg-card);border: 1px solid var(--border);border-radius: var(--radius-lg);padding: 32px 36px;margin-top: 30px;">
+      <div style="display: flex;align-items: center;gap: 16px;margin-bottom: 18px;">
+        <h3 style="font-size: 20px;font-weight: 700;color: var(--sz-red);margin: 0;">演练小结</h3>
+        <span style="font-size: 12px;color: var(--text-muted);margin-left: auto;">总指挥</span>
+      </div>
+      <p style="font-size: 14px;color: var(--text-secondary);line-height: 2;text-indent: 2em;">
+        （待补充演练小结内容）
+      </p>
+    </div>
+
+    <!-- 局方讲评 -->
+    <div style="background: var(--bg-card);border: 1px solid var(--border);border-radius: var(--radius-lg);padding: 32px 36px;margin-top: 20px;">
+      <div style="display: flex;align-items: center;gap: 16px;margin-bottom: 18px;">
+        <h3 style="font-size: 20px;font-weight: 700;color: var(--sz-red);margin: 0;">局方讲评</h3>
+      </div>
+      <div style="display: grid;grid-template-columns: repeat(3,1fr);gap: 16px;margin-bottom: 14px;">
+        <div style="background: var(--bg-secondary);border-radius: 8px;padding: 18px;text-align: center;">
+          <div style="font-size: 28px;margin-bottom: 8px;">&#9998;</div>
+          <div style="font-weight: 600;color: var(--text-primary);font-size: 14px;">飞标</div>
+          <div style="font-size: 12px;color: var(--text-muted);margin-top: 4px;">（待补充）</div>
+        </div>
+        <div style="background: var(--bg-secondary);border-radius: 8px;padding: 18px;text-align: center;">
+          <div style="font-size: 28px;margin-bottom: 8px;">&#9881;</div>
+          <div style="font-weight: 600;color: var(--text-primary);font-size: 14px;">适航</div>
+          <div style="font-size: 12px;color: var(--text-muted);margin-top: 4px;">（待补充）</div>
+        </div>
+        <div style="background: var(--bg-secondary);border-radius: 8px;padding: 18px;text-align: center;">
+          <div style="font-size: 28px;margin-bottom: 8px;">&#128747;</div>
+          <div style="font-weight: 600;color: var(--text-primary);font-size: 14px;">航务</div>
+          <div style="font-size: 12px;color: var(--text-muted);margin-top: 4px;">（待补充）</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 公司领导发言 -->
+    <div style="background: var(--bg-card);border: 1px solid var(--border);border-radius: var(--radius-lg);padding: 32px 36px;margin-top: 20px;">
+      <div style="display: flex;align-items: center;gap: 16px;margin-bottom: 18px;">
+        <h3 style="font-size: 20px;font-weight: 700;color: var(--sz-red);margin: 0;">公司参加领导发言</h3>
+      </div>
+      <p style="font-size: 14px;color: var(--text-secondary);line-height: 2;text-indent: 2em;">
+        （待补充领导发言内容）
+      </p>
+    </div>
+
+    <!-- 演练结束 -->
+    <div id="step-end" style="position: relative;text-align: center;margin-top: 30px;padding: 50px 36px 40px;background: var(--bg-card);border: 1px solid var(--border);border-radius: var(--radius-lg);">
+      <!-- 主标题 -->
+      <h3 id="thankyou-title" style="font-size: 28px;font-weight: 700;color: var(--sz-red);margin-bottom: 12px;opacity: 0;transform: translateY(16px);transition: all 0.8s ease;">演练结束</h3>
+      
+      <!-- 副标题 -->
+      <p id="thankyou-subtitle" style="font-size: 16px;color: var(--text-muted);margin-bottom: 24px;opacity: 0;transform: translateY(12px);transition: all 0.8s ease 0.2s;">请各位领导指正</p>
+      
+      <!-- 装饰线 -->
+      <div id="end-line" style="width: 0;height: 1px;background: var(--sz-red);margin: 0 auto 24px;transition: width 1.2s ease 0.5s;"></div>
+      
+      <!-- 深航logo -->
+      <div id="end-logo" style="opacity: 0;transform: translateY(10px);transition: all 0.8s ease 0.8s;">
+        <img src="images/sz-logo.png" alt="深圳航空" style="height: 36px;width: auto;">
+        <p style="font-size: 13px;color: var(--text-muted);margin-top: 12px;">深圳航空 · 标准管理部</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 页脚 -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-logo">
+      <img src="images/sz-logo.png" alt="深圳航空" style="height: 28px;width: auto;">
+      <span style="color: var(--sz-red);font-weight: 600;font-size: 14px;">深圳航空</span>
+    </div>
+    <p>深圳航空有限责任公司 &#183; 标准管理部</p>
+    <p style="margin-top: 6px;">A350 PBN 地面演示 &#183; 2026年6月</p>
+  </div>
+</footer>
+
+<!-- 回到顶部 -->
+<button class="back-to-top" onclick="window.scrollTo({top: 0,behavior: 'smooth'})" title="回到顶部">&#8593;</button>
+
+<script>
+// Hero 粒子效果
+(function() {
+  const canvas = document.getElementById('heroCanvas');
+  if (!canvas) return;
+  const hero = canvas.parentElement;
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let animId;
+
+  function resize() {
+    canvas.width = hero.offsetWidth;
+    canvas.height = hero.offsetHeight;
+  }
+
+  function createParticles() {
+    const count = 50;
+    particles = [];
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 2 + 1,
+        alpha: Math.random() * 0.4 + 0.1,
+        pulse: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      // Bounce edges
+      if (p.x < 0) p.x = canvas.width;
+      if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height;
+      if (p.y > canvas.height) p.y = 0;
+      // Pulsing alpha
+      const alpha = p.alpha + Math.sin(Date.now() * 0.002 + p.pulse) * 0.15;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(196, 18, 48, ${Math.max(0.05, alpha)})`;
+      ctx.fill();
+    }
+    animId = requestAnimationFrame(draw);
+  }
+
+  resize();
+  createParticles();
+  draw();
+  window.addEventListener('resize', () => { resize(); createParticles(); });
+})();
+</script>
+
+<!-- 结束页滚动动画 -->
+<script>
+(function() {
+  let triggered = false;
+  
+  function checkVisibility() {
+    if (triggered) return;
+    const el = document.getElementById('step-end');
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 100 && rect.bottom > 0) {
+      triggered = true;
+      setTimeout(() => {
+        const title = document.getElementById('thankyou-title');
+        const subtitle = document.getElementById('thankyou-subtitle');
+        const logo = document.getElementById('end-logo');
+        const line = document.getElementById('end-line');
+        
+        if (title) {
+          title.style.opacity = '1';
+          title.style.transform = 'translateY(0)';
+        }
+        if (subtitle) {
+          subtitle.style.opacity = '1';
+          subtitle.style.transform = 'translateY(0)';
+        }
+        if (line) {
+          line.style.width = '120px';
+        }
+        if (logo) {
+          logo.style.opacity = '1';
+          logo.style.transform = 'translateY(0)';
+        }
+      }, 100);
+    }
+  }
+  
+  window.addEventListener('scroll', checkVisibility);
+  checkVisibility();
+})();
+</script>
+
+<!-- 飞机导航栏JS -->
+<script>
+(function() {
+  const nav = document.getElementById('plane-nav');
+  if (!nav) return;
+
+  const navItems = nav.querySelectorAll('.nav-item');
+  const sections = [];
+  navItems.forEach(function(item) {
+    var id = item.getAttribute('href').slice(1);
+    var el = document.getElementById(id);
+    if (el) sections.push({ id: id, el: el, item: item });
+  });
+
+  function updateActive() {
+    var scrollY = window.scrollY + window.innerHeight / 2;
+    var activeIdx = 0;
+    for (var i = sections.length - 1; i >= 0; i--) {
+      if (sections[i].el.offsetTop <= scrollY) {
+        activeIdx = i;
+        break;
+      }
+    }
+
+    navItems.forEach(function(item, idx) {
+      item.classList.toggle('active', idx === activeIdx);
+    });
+
+    var tracks = nav.querySelectorAll('.nav-track');
+    tracks.forEach(function(track, idx) {
+      track.classList.toggle('filled', idx < activeIdx);
+    });
+  }
+
+  navItems.forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      var id = this.getAttribute('href').slice(1);
+      var el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  window.addEventListener('scroll', updateActive);
+  window.addEventListener('resize', updateActive);
+  updateActive();
+})();
+</script>
+
+</body>
+</html>
