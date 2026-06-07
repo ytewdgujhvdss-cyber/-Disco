@@ -642,14 +642,8 @@ body {
 <section class="section" id="speech">
   <div class="container" style="max-width: 800px;">
     <div class="divider"></div>
-    <div class="section-label">&#9670; 欢迎致辞</div>
-    <div class="section-title">领导发言</div>
-    <div style="background: var(--bg-card);border: 1px solid var(--border);border-radius: var(--radius-lg);padding: 40px;margin-top: 30px;text-align: center;">
-      <div style="font-size: 60px;margin-bottom: 20px;opacity: 0.15;">&#128172;</div>
-      <p style="font-size: 15px;color: var(--text-muted);line-height: 2;">
-        （待补充领导发言内容）
-      </p>
-    </div>
+    <div class="section-label" style="text-align: center;">&#9670; 欢迎致辞</div>
+    <div class="section-title" style="text-align: center;font-size: 38px;margin-top: 12px;">领导发言</div>
   </div>
 </section>
 
@@ -682,7 +676,7 @@ body {
     </div>
 
     <div class="personnel-section">
-      <div class="personnel-title">深圳航空 &#8212; 内部演练团队（7人）</div>
+      <div class="personnel-title">深圳航空 &#8212; 内部演练团队（9人）</div>
       <div class="personnel-grid">
         <div class="personnel-card">
           <div class="name">陈孝臣</div>
@@ -705,9 +699,19 @@ body {
           <div class="role">情报工程师</div>
         </div>
         <div class="personnel-card">
+          <div class="name">魏小康</div>
+          <div class="dept">运行管理部</div>
+          <div class="role">总值班经理</div>
+        </div>
+        <div class="personnel-card">
           <div class="name">王国庆</div>
           <div class="dept">维修工程部</div>
           <div class="role">维修放行工程师</div>
+        </div>
+        <div class="personnel-card">
+          <div class="name">王利强</div>
+          <div class="dept">维修工程部</div>
+          <div class="role">维修工程师</div>
         </div>
         <div class="personnel-card">
           <div class="name">章琳</div>
@@ -736,7 +740,7 @@ body {
         根据局方对航空公司PBN运行能力验证的要求，深圳航空拟于2026年6月10日开展A350机型PBN运行能力桌面推演。本次演示以验证航班ZH9001（深圳宝安&#8594;乌鲁木齐地窝堡）为背景，模拟从飞行前准备到进近着陆的完整运行链条，覆盖导航数据库管理、正常放行、FMS选择器故障、双GPS干扰丢失信号、RNP APCH进近阶段单套FMC失效等五个典型场景。
       </p>
       <p style="font-size: 15px;color: var(--text-secondary);line-height: 2.2;text-indent: 2em;margin-top: 16px;">
-        参演人员涵盖飞行、签派、情报、维修、标准管理等核心岗位共7人，由标准管理部飞行运行标准工程师许超主持。通过本次桌面推演，旨在系统验证深航飞行员、签派员和维修人员对A350机型PBN运行的应急处置能力，展现公司在导航数据库管理、RAIM预测分析、MEL保留处置、空中故障协同等方面的规章符合性和运行规范性。
+        参演人员涵盖飞行、签派、情报、维修、标准管理等核心岗位共9人，由标准管理部飞行运行标准工程师许超主持。通过本次桌面推演，旨在系统验证深航飞行员、签派员和维修人员对A350机型PBN运行的应急处置能力，展现公司在导航数据库管理、RAIM预测分析、MEL保留处置、空中故障协同等方面的规章符合性和运行规范性。
       </p>
     </div>
   </div>
@@ -786,19 +790,45 @@ body {
 
     <div class="route-section">
       <h3>&#128752; 航路示意图 ZGSZ &#8594; ZWWW</h3>
-      <img src="images/image7.png" alt="航路图 - ZGSZ至ZWWW完整航路" class="route-map-img" onclick="window.open(this.src)">
+
+      <!-- 两栏布局：图片(4/5) + 航路信息(1/5) -->
+      <div style="display: flex;gap: 8px;margin-bottom: 28px;">
+        <!-- 左：航路示意图 -->
+        <div style="flex: 4;min-width: 0;">
+          <img src="images/image7.png" alt="航路图 - ZGSZ至ZWWW完整航路" style="width: 100%;border-radius: var(--radius);border: 1px solid var(--border);cursor: pointer;" onclick="window.open(this.src)">
+        </div>
+        <!-- 右：航路验证信息 -->
+        <div style="flex: 1;min-width: 0;background: var(--bg-card);border: 1px solid var(--border);border-radius: var(--radius);padding: 14px 14px;display: flex;flex-direction: column;justify-content: center;">
+          <div style="font-weight: 700;color: var(--sz-red);margin-bottom: 6px;font-size: 15px;">航路：验证航路信息：ZGSZZWWW-1</div>
+          <div style="font-family: 'SF Mono',monospace;font-size: 12px;color: var(--text-secondary);line-height: 1.7;word-break: break-all;">MIPAG W21 TEPID W24 OSNOV G586 QP B330 ELKAL W179 OMBON W195 IDOPA W197 ANDIM B215 IBANO G470 QTV W99 AGOXA</div>
+        </div>
+      </div>
+
+      <!-- image8 + RNAV2航段信息 -->
+      <div style="display: flex;gap: 8px;margin-bottom: 28px;">
+        <div style="flex: 4;min-width: 0;">
+          <img src="images/image8.png" alt="航路中段" style="width: 100%;border-radius: var(--radius);border: 1px solid var(--border);cursor: pointer;" onclick="window.open(this.src)">
+        </div>
+        <div style="flex: 1;min-width: 0;background: var(--bg-card);border: 1px solid var(--border);border-radius: var(--radius);padding: 16px 14px;display: flex;flex-direction: column;justify-content: center;">
+          <div style="font-weight: 700;color: var(--sz-red);margin-bottom: 6px;font-size: 15px;">RNAV2 航段：</div>
+          <div style="font-family: 'SF Mono',monospace;font-size: 13px;color: var(--text-secondary);line-height: 1.7;">MIPAG W21 TEPID W24 OSNOV G586 QP B330 ELKAL W179 OMBON W195 IDOPA W197 ANDIM B215 LAXEV</div>
+          <div style="margin-top: 6px;font-size: 13px;color: var(--warn);font-weight: 600;">航距 1258 NM</div>
+        </div>
+      </div>
+
+      <!-- image9 + RNP4航段信息 -->
+      <div style="display: flex;gap: 8px;margin-bottom: 28px;">
+        <div style="flex: 4;min-width: 0;">
+          <img src="images/image9.png" alt="RNP4航段" style="width: 100%;border-radius: var(--radius);border: 1px solid var(--border);cursor: pointer;" onclick="window.open(this.src)">
+        </div>
+        <div style="flex: 1;min-width: 0;background: var(--bg-card);border: 1px solid var(--border);border-radius: var(--radius);padding: 16px 14px;display: flex;flex-direction: column;justify-content: center;">
+          <div class="spec" style="font-size: 14px;color: var(--text-primary);font-weight: 700;">RNP 4 &#8212; 270 NM</div>
+          <div class="path" style="font-family: 'SF Mono',monospace;font-size: 13px;color: var(--text-secondary);margin-top: 6px;">LAXEV B215 TODOD</div>
+          <div class="dist" style="font-size: 12px;color: var(--text-muted);margin-top: 6px;">纯 RNAV 空域 &#183; 需传统导航备份方案</div>
+        </div>
+      </div>
 
       <div class="route-info">
-        <div class="route-segment">
-          <div class="spec">RNAV 2 &#8212; 1258 NM</div>
-          <div class="path">MIPAG W21 TEPID W24 OSNOV G586 QP B330 ELKAL W179 OMBON W195 IDOPA W197 ANDIM B215 LAXEV</div>
-          <div class="dist">21 个航路点</div>
-        </div>
-        <div class="route-segment">
-          <div class="spec">RNP 4 &#8212; 270 NM</div>
-          <div class="path">LAXEV B215 TODOD</div>
-          <div class="dist">纯 RNAV 空域 &#183; 需传统导航备份方案</div>
-        </div>
         <div class="route-segment">
           <div class="spec">RNAV 2 &#8212; 449 NM</div>
           <div class="path">TODOD B215 IBANO G470 QTV W99 AGOXA</div>
@@ -807,21 +837,13 @@ body {
       </div>
 
       <!-- 航路详细表格图 -->
-      <div class="scenario-images" style="margin-top: 32px;">
-        <div>
-          <img src="images/image6.png" alt="公司航路详细表格" onclick="window.open(this.src)">
+      <div class="scenario-images" style="margin-top: 32px;display: grid;grid-template-columns: repeat(2, 1fr);gap: 16px;">
+        <div style="text-align: center;">
+          <img src="images/image6.png" alt="公司航路详细表格" style="width: 100%;border-radius: var(--radius);border: 1px solid var(--border);cursor: pointer;" onclick="window.open(this.src)">
           <div class="img-caption">公司航路 ZGSZZWWW1 详细航路点清单</div>
         </div>
-        <div>
-          <img src="images/image8.png" alt="航路中段" onclick="window.open(this.src)">
-          <div class="img-caption">航路中段详细航迹图</div>
-        </div>
-        <div>
-          <img src="images/image9.png" alt="RNP4航段" onclick="window.open(this.src)">
-          <div class="img-caption">RNP 4 航段 LAXEV-TODOD 特写</div>
-        </div>
-        <div>
-          <img src="images/image11.png" alt="终端区航图" onclick="window.open(this.src)">
+        <div style="text-align: center;">
+          <img src="images/image11.png" alt="终端区航图" style="width: 100%;border-radius: var(--radius);border: 1px solid var(--border);cursor: pointer;" onclick="window.open(this.src)">
           <div class="img-caption">终端区进场航迹图</div>
         </div>
       </div>
